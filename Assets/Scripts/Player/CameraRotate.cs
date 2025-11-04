@@ -5,6 +5,7 @@ public class CameraRotate : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Transform cameraTransform;
+   
 
     [Header("Rotation")]
     [Tooltip("Smoothly follow camera yaw. Disable for a hard lock.")]

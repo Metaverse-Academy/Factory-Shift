@@ -44,10 +44,12 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Speed > this means Run=true (only when not crouching/crawling).")]
     [SerializeField] private float runSpeedThreshold = 3.6f;  // tweak to your clips
     [Tooltip("Small deadzone to keep Idle from flickering when nearly still.")]
-    [SerializeField] private float idleDeadzone = 0.05f;
-    [Tooltip("If true, we’ll rotate the model toward planar movement direction (useful for 3rd-person).")]
+    //[SerializeField] private float idleDeadzone = 0.05f;
+    //[Tooltip("If true, we’ll rotate the model toward planar movement direction (useful for 3rd-person).")]
     [SerializeField] private bool rotateModelToMove = false;
     [SerializeField] private Transform modelRoot; // optional, for model rotation only
+    [SerializeField] private float idleDeadzone = 0.15f; // raise if needed
+    [SerializeField] private float stopFriction = 20f;   // 20–35 feels good
 
     private Vector3 planarMoveDir;
     private Rigidbody rb;
@@ -103,17 +105,19 @@ public class PlayerMovement : MonoBehaviour
                            (isSprinting ? sprintSpeed : walkSpeed));
 
         Vector3 targetVelH = planarMoveDir * targetSpeed;
+        
 
-        Vector3 v = rb.linearVelocity; // If using Rigidbody, change to rb.velocity
-        Vector3 vH = Vector3.Lerp(new Vector3(v.x, 0f, v.z), targetVelH, acceleration * Time.fixedDeltaTime);
-        rb.linearVelocity = new Vector3(vH.x, v.y, vH.z); // If using Rigidbody, change to rb.velocity
+     Vector3 v = rb.linearVelocity; // use rb.velocity if standard Rigidbody
+Vector3 vH = Vector3.Lerp(new Vector3(v.x, 0f, v.z), targetVelH, acceleration * Time.fixedDeltaTime);
 
-        // Optional face movement direction (3rd-person)
-        if (rotateModelToMove && modelRoot != null && planarMoveDir.sqrMagnitude > 0.0001f)
-        {
-            Quaternion look = Quaternion.LookRotation(planarMoveDir, Vector3.up);
-            modelRoot.rotation = Quaternion.Slerp(modelRoot.rotation, look, 12f * Time.deltaTime);
-        }
+if (planarMoveDir == Vector3.zero)
+{
+    // aggressively stop horizontal sliding when no input
+    vH = Vector3.MoveTowards(new Vector3(v.x, 0f, v.z), Vector3.zero, stopFriction * Time.fixedDeltaTime);
+}
+
+rb.linearVelocity = new Vector3(vH.x, v.y, vH.z); // or rb.velocity
+
     }
 
     // ---- Stance management ----
@@ -192,9 +196,10 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!animator) return;
 
-        // Horizontal speed magnitude
-        Vector3 v = rb.linearVelocity; // change to rb.velocity if needed
-        float horizSpeed = new Vector3(v.x, 0f, v.z).magnitude;
+      Vector3 vel = rb.linearVelocity; // or rb.velocity
+      float horizSpeed = new Vector3(vel.x, 0f, vel.z).magnitude;
+        float speedParam = (horizSpeed <= idleDeadzone) ? 0f : horizSpeed;
+      animator.SetFloat("Speed", speedParam);
 
         // Core parameters
         animator.SetBool("Grounded", isGrounded);
@@ -202,8 +207,8 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool("Crawl",    isCrawling);
 
         // Speed param drives Idle/Walk/Run blend tree (0..max)
-        float speedParam = (horizSpeed <= idleDeadzone) ? 0f : horizSpeed;
-        animator.SetFloat("Speed", speedParam);
+        //float speedParam = (horizSpeed <= idleDeadzone) ? 0f : horizSpeed;
+        //animator.SetFloat("Speed", speedParam);
 
         // Run flag only when upright & actually moving fast
         bool run = !isCrouching && !isCrawling && horizSpeed > runSpeedThreshold && isSprinting;
