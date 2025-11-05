@@ -405,6 +405,69 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 0}
+--- !u!1 &386392568
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 386392571}
+  - component: {fileID: 386392570}
+  - component: {fileID: 386392569}
+  m_Layer: 0
+  m_Name: transforming
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &386392569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 386392568}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8aa1ee6018d6c5f41ae58e5fe9145198, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CutsceneAutoReturn
+  returnSceneOverride: RazanMap1
+--- !u!320 &386392570
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 386392568}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 0}
+  m_InitialState: 1
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 1
+  m_InitialTime: 0
+  m_SceneBindings: []
+  m_ExposedReferences:
+    m_References: []
+--- !u!4 &386392571
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 386392568}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.4808, y: -0.13776, z: 9.27}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -590,6 +653,8 @@ MonoBehaviour:
       Input:
         InputAction: {fileID: -8818210345356645471, guid: 20d7f63b1fa2f3948a553dc4c39d79a0, type: 3}
         Gain: 1
+        LegacyInput: 
+        LegacyGain: 1
         CancelDeltaTime: 0
       InputValue: 0
       Driver:
@@ -601,6 +666,8 @@ MonoBehaviour:
       Input:
         InputAction: {fileID: -8818210345356645471, guid: 20d7f63b1fa2f3948a553dc4c39d79a0, type: 3}
         Gain: -1
+        LegacyInput: 
+        LegacyGain: 1
         CancelDeltaTime: 0
       InputValue: 0
       Driver:
@@ -1459,3 +1526,4 @@ SceneRoots:
   - {fileID: 1858305409}
   - {fileID: 1114262295}
   - {fileID: 246515960}
+  - {fileID: 386392571}
