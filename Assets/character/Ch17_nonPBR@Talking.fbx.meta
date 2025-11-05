@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 20807817bdf940943a8b753ad5e18d35
+guid: bb229a729e0b0294eb99b92d597ba675
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Crouched Walking
+      name: Talking
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0
-      lastFrame: 32
+      lastFrame: 113
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
