@@ -4,6 +4,12 @@ using UnityEngine.AI;
 
 public class EnemyAi : MonoBehaviour
 {
+
+ public int maxHealth = 100; // *****صحة الوحش الكاملة
+ private int currentHealth;
+    
+
+
     private enum State { Patrol, Chase, Attack}
     private State currentState = State.Patrol;
 
@@ -28,6 +34,9 @@ public class EnemyAi : MonoBehaviour
     void Start()
     {
         Patrol();
+
+
+         currentHealth = maxHealth; // في البداية يكون بكامل صحته***
     }
 
     void Update()
@@ -95,4 +104,22 @@ public class EnemyAi : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, chaseDistance);
     }
+
+    public void TakeDamage(int damageAmount)
+    {
+        currentHealth -= damageAmount;
+        Debug.Log("Enemy took damage! Current health: " + currentHealth);
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+     void Die()
+    {
+        Debug.Log("Enemy died 💀 Bye loser");
+        Destroy(gameObject); // يختفي الوحش****
+    }
+
+
 }
