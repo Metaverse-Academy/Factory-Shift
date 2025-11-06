@@ -69,7 +69,7 @@ public class PlayerMovement : MonoBehaviour
         capsule = GetComponent<CapsuleCollider>();
 
         rb.interpolation = RigidbodyInterpolation.Interpolate;
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationY;
 
         initialCapsuleRadius = capsule.radius;
         initialCapsuleCenter = capsule.center;
