@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.Events;
 
 [RequireComponent(typeof(Collider))]
 public class RepairableFixable : MonoBehaviour
@@ -11,36 +10,61 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private string playerTag = "Player";
 
     [Header("Input (New Input System)")]
-    [Tooltip("Bind this action to F (Hold) in your Input Actions asset.")]
+    [Tooltip("Bind to F (Hold) in your actions asset.")]
     [SerializeField] private InputActionReference holdFixAction; // F
+    [Tooltip("Key to hit during skill-check (e.g., Space).")]
+    [SerializeField] private Key skillCheckKey = Key.Space;
 
     [Header("UI: Prompt")]
-    [SerializeField] private GameObject promptRoot;  // "HOLD F TO FIX"
-    [SerializeField] private TMP_Text promptLabel;   // optional
+    [SerializeField] private GameObject promptRoot;   // "HOLD F TO FIX"
+    [SerializeField] private TMP_Text promptLabel;    // optional
     [SerializeField] private string promptText = "HOLD F TO FIX";
 
     [Header("UI: Hold Progress")]
-    [SerializeField] private CanvasGroup holdGroup;  // shows while holding
-    [Tooltip("Radial Image (Image Type = Filled, Fill Method = Radial 360).")]
-    [SerializeField] private Image holdFill;         // fillAmount 0..1
+    [SerializeField] private CanvasGroup holdGroup;   // show while holding F
+    [Tooltip("Radial Image (Fill Method = Radial 360).")]
+    [SerializeField] private Image holdFill;          // fillAmount 0..1
 
     [Header("Repair Settings")]
-    [Tooltip("Seconds required to finish (holding continuously).")]
     [SerializeField] private float totalRepairSeconds = 6.0f;
-    [Tooltip("If OFF, progress decays when you release F.")]
     [SerializeField] private bool pauseWhenReleased = true;
-    [SerializeField] private float decayPerSecond = 0.5f;
+    [SerializeField] private float decayPerSecond = 0f;
 
-    [Header("On Complete (optional)")]
+    // -------------------- Circular Skill Check --------------------
+    [Header("DBD-like Skill Check (Circular)")]
+    [SerializeField] private CanvasGroup skillGroup;    // root group for the skill-check UI
+    [SerializeField] private RectTransform needle;      // rotates around Z (pivot at bottom-center)
+    [SerializeField] private Image successSlice;        // wedge/arc image (purely visual)
+    [Tooltip("Center of success zone in CLOCK degrees: 0=up, 90=right, 180=down, 270=left.")]
+    [SerializeField] private float successCenterDeg = 300f;
+    [Tooltip("Arc width of success zone in degrees.")]
+    [SerializeField] private float successArcDeg = 30f;
+    [Tooltip("Needle rotation speed (deg/sec).")]
+    [SerializeField] private float needleSpeedDegPerSec = 360f;
+    [Tooltip("Random time range between skill checks while holding (seconds).")]
+    [SerializeField] private Vector2 skillCheckEverySeconds = new Vector2(2.5f, 5.0f);
+    [Tooltip("Time window (sec) after entering zone before leaving counts as a miss.")]
+    [SerializeField] private float pressGraceSeconds = 0.15f;
+    [Tooltip("Repair bonus/penalty on success/fail (0..1 of total).")]
+    [SerializeField] private float successBonus = 0.12f;
+    [SerializeField] private float failPenalty = 0.18f;
+    [SerializeField] private bool useUnscaledTimeForSkill = true;
+
+    private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°=up
+
+    [Header("Finish")]
     [SerializeField] private GameObject[] enableOnComplete;
     [SerializeField] private GameObject[] disableOnComplete;
-    [SerializeField] private UnityEvent onRepairCompleted; // hook SFX/VFX
 
     // state
     private bool playerInRange;
     private bool holding;
-    private bool repaired;
     private float progress01; // 0..1
+    private float nextSkillCheckTime; // world time for next skill-check
+    private bool skillActive;
+    private float needleAngleClock; // 0..360 in CLOCK convention (0=up, cw+)
+    private float enteredZoneTime = -999f;
+    private bool repaired;
 
     private void Reset()
     {
@@ -53,6 +77,7 @@ public class RepairableFixable : MonoBehaviour
         if (promptLabel) promptLabel.text = promptText;
         ShowPrompt(false);
         ShowHold(false);
+        ShowSkill(false);
 
         if (holdFixAction != null)
             holdFixAction.action.Enable();
@@ -68,7 +93,6 @@ public class RepairableFixable : MonoBehaviour
     {
         if (repaired) return;
         if (!other.CompareTag(playerTag)) return;
-
         playerInRange = true;
         ShowPrompt(true);
     }
@@ -76,41 +100,31 @@ public class RepairableFixable : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag(playerTag)) return;
-
         playerInRange = false;
         holding = false;
         ShowPrompt(false);
         ShowHold(false);
+        CancelSkillCheck();
     }
 
     private void Update()
     {
         if (repaired) return;
 
-        // 1) Check hold
-        bool isPressed = playerInRange && holdFixAction != null && holdFixAction.action.IsPressed();
+        bool press = playerInRange && holdFixAction != null && holdFixAction.action.IsPressed();
 
-        if (isPressed && !holding)
+        if (press && !holding)
         {
             holding = true;
             ShowPrompt(false);
             ShowHold(true);
+            ScheduleNextSkillCheck();
         }
-        else if (!isPressed && holding)
+        else if (!press && holding)
         {
             holding = false;
-            if (!pauseWhenReleased && progress01 > 0f)
-            {
-                // will decay below
-            }
-            else if (pauseWhenReleased && progress01 <= 0f)
-            {
-                ShowHold(false);
-                ShowPrompt(true);
-            }
         }
 
-        // 2) Progress / decay
         if (holding)
         {
             float perSec = 1f / Mathf.Max(0.01f, totalRepairSeconds);
@@ -119,17 +133,13 @@ public class RepairableFixable : MonoBehaviour
         else if (!pauseWhenReleased && progress01 > 0f)
         {
             progress01 = Mathf.Clamp01(progress01 - decayPerSecond * Time.deltaTime);
-            if (progress01 <= 0f)
-            {
-                ShowHold(false);
-                if (playerInRange) ShowPrompt(true);
-            }
         }
 
-        // 3) Update UI
         if (holdFill) holdFill.fillAmount = progress01;
 
-        // 4) Finish
+        if (holding) HandleSkillChecks();
+        else CancelSkillCheck();
+
         if (progress01 >= 1f && !repaired)
         {
             repaired = true;
@@ -137,18 +147,7 @@ public class RepairableFixable : MonoBehaviour
         }
     }
 
-    private void CompleteRepair()
-    {
-        ShowPrompt(false);
-        ShowHold(false);
-
-        foreach (var go in enableOnComplete) if (go) go.SetActive(true);
-        foreach (var go in disableOnComplete) if (go) go.SetActive(false);
-
-        onRepairCompleted?.Invoke();
-    }
-
-    // ---- UI helpers ----
+    // ------------ UI helpers ------------
     private void ShowPrompt(bool on)
     {
         if (promptRoot) promptRoot.SetActive(on);
@@ -159,5 +158,144 @@ public class RepairableFixable : MonoBehaviour
         if (!holdGroup) return;
         holdGroup.alpha = on ? 1f : 0f;
         holdGroup.gameObject.SetActive(on);
+    }
+
+    private void ShowSkill(bool on)
+    {
+        if (!skillGroup) return;
+        skillGroup.alpha = on ? 1f : 0f;
+        skillGroup.gameObject.SetActive(on);
+    }
+
+    // ------------ Skill-check logic ------------
+    private void ScheduleNextSkillCheck()
+    {
+        nextSkillCheckTime = Time.time + Random.Range(skillCheckEverySeconds.x, skillCheckEverySeconds.y);
+    }
+
+    private void HandleSkillChecks()
+    {
+        if (!skillActive && Time.time >= nextSkillCheckTime)
+            StartSkillCheck();
+
+        if (!skillActive) return;
+
+        float dt = useUnscaledTimeForSkill ? Time.unscaledDeltaTime : Time.deltaTime;
+
+        // advance in CLOCK space (0=up, cw+)
+        needleAngleClock = Mathf.Repeat(needleAngleClock + needleSpeedDegPerSec * dt, 360f);
+
+        // apply to UI (convert clock→UI: zEuler = -(clock - 90))
+        if (needle)
+            needle.localRotation = Quaternion.Euler(0f, 0f, -(needleAngleClock - CLOCK_ZERO_IS_UP));
+
+        // space key press
+        if (Keyboard.current != null && Keyboard.current[skillCheckKey].wasPressedThisFrame)
+        {
+            if (IsNeedleInSuccess())
+            {
+                progress01 = Mathf.Clamp01(progress01 + successBonus);
+                EndSkillCheck();
+                ScheduleNextSkillCheck();
+            }
+            else
+            {
+                progress01 = Mathf.Clamp01(progress01 - failPenalty);
+                EndSkillCheck();
+                nextSkillCheckTime = Time.time + 1.25f;
+            }
+        }
+
+        // grace-based miss (left zone without pressing)
+        if (enteredZoneTime > 0f && (useUnscaledTimeForSkill ? Time.unscaledTime : Time.time) - enteredZoneTime > pressGraceSeconds && !IsNeedleInSuccess())
+        {
+            progress01 = Mathf.Clamp01(progress01 - failPenalty);
+            EndSkillCheck();
+            nextSkillCheckTime = Time.time + 1.25f;
+        }
+
+        // track entering zone
+        if (IsNeedleInSuccess())
+        {
+            if (enteredZoneTime < 0f)
+                enteredZoneTime = useUnscaledTimeForSkill ? Time.unscaledTime : Time.time;
+        }
+    }
+
+    private void StartSkillCheck()
+    {
+        skillActive = true;
+        enteredZoneTime = -999f;
+
+        // ensure pivots & anchors so the needle spins like a clock hand
+        SetupDial();
+
+        ShowSkill(true);
+
+        // randomize starting angle & spin direction in CLOCK space
+        needleAngleClock = Random.Range(0f, 360f);
+        if (Random.value < 0.5f) needleSpeedDegPerSec = -Mathf.Abs(needleSpeedDegPerSec);
+        else needleSpeedDegPerSec = Mathf.Abs(needleSpeedDegPerSec);
+
+        // place/rotate success wedge in CLOCK convention
+        if (successSlice)
+            successSlice.rectTransform.localRotation =
+                Quaternion.Euler(0f, 0f, -(successCenterDeg - CLOCK_ZERO_IS_UP));
+    }
+
+    private void EndSkillCheck()
+    {
+        skillActive = false;
+        enteredZoneTime = -999f;
+        ShowSkill(false);
+    }
+
+    private void CancelSkillCheck()
+    {
+        if (!skillActive) return;
+        EndSkillCheck();
+    }
+
+    private bool IsNeedleInSuccess()
+    {
+        // needleAngleClock is already in 0..360 with 0=up (clockwise positive)
+        float half = successArcDeg * 0.5f;
+        float delta = Mathf.DeltaAngle(successCenterDeg, needleAngleClock); // -180..180
+        return Mathf.Abs(delta) <= half;
+    }
+
+    private void SetupDial()
+    {
+        // Needle rotates around its base at the dial center
+        if (needle != null)
+        {
+            needle.pivot = new Vector2(0.5f, 0f);
+            needle.anchorMin = needle.anchorMax = new Vector2(0.5f, 0.5f);
+            needle.anchoredPosition = Vector2.zero;
+        }
+
+        if (successSlice != null)
+        {
+            var rt = successSlice.rectTransform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            // For a perfect visual match set Image:
+            // - Type: Filled
+            // - Fill Method: Radial 360
+            // - Fill Origin: Top
+            // - Clockwise: ON
+            // and control its localRotation only from code above.
+        }
+    }
+
+    // ------------ Finish ------------
+    private void CompleteRepair()
+    {
+        ShowPrompt(false);
+        ShowHold(false);
+        CancelSkillCheck();
+
+        foreach (var go in enableOnComplete) if (go) go.SetActive(true);
+        foreach (var go in disableOnComplete) if (go) go.SetActive(false);
     }
 }
