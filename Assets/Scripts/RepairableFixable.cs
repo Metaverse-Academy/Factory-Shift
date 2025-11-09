@@ -233,26 +233,28 @@ public class RepairableFixable : MonoBehaviour
         }
     }
 
-    private void StartSkillCheck()
-    {
-        skillActive = true;
-        enteredZoneTime = -999f;
+  private void StartSkillCheck()
+{
+    skillActive = true;
+    enteredZoneTime = -999f;
 
-        // ensure pivots & anchors so the needle spins like a clock hand
-        SetupDial();
+    // make sure pivots/anchors are correct so it rotates like a clock hand
+    SetupDial();
 
-        ShowSkill(true);
+    ShowSkill(true);
 
-        // randomize starting angle & spin direction in CLOCK space
-        needleAngleClock = Random.Range(0f, 360f);
-        if (Random.value < 0.5f) needleSpeedDegPerSec = -Mathf.Abs(needleSpeedDegPerSec);
-        else needleSpeedDegPerSec = Mathf.Abs(needleSpeedDegPerSec);
+    // ALWAYS start at the top (0° = up in our clock convention)
+    needleAngleClock = 0f;
 
-        // place/rotate success wedge in CLOCK convention
-        if (successSlice)
-            successSlice.rectTransform.localRotation =
-                Quaternion.Euler(0f, 0f, -(successCenterDeg - CLOCK_ZERO_IS_UP));
-    }
+    // ALWAYS rotate clockwise
+    needleSpeedDegPerSec = Mathf.Abs(needleSpeedDegPerSec);
+
+    // Place/rotate the success wedge in CLOCK convention (0=up)
+    if (successSlice)
+        successSlice.rectTransform.localRotation =
+            Quaternion.Euler(0f, 0f, -(successCenterDeg - CLOCK_ZERO_IS_UP));
+}
+
 
     private void EndSkillCheck()
     {
