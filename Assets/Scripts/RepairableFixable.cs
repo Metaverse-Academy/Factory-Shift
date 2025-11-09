@@ -49,6 +49,11 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private float successBonus = 0.12f;
     [SerializeField] private float failPenalty = 0.18f;
     [SerializeField] private bool useUnscaledTimeForSkill = true;
+    // --- Objective UI (checkmark) ---
+    [Header("Objective UI")]
+    [SerializeField] private CanvasGroup objectiveCheck; // CanvasGroup on the check sprite
+    [SerializeField] private float checkFadeDuration = 0.35f;
+
 
     private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°=up
 
@@ -74,6 +79,12 @@ public class RepairableFixable : MonoBehaviour
 
     private void OnEnable()
     {
+        if (objectiveCheck)
+        {
+            if (!objectiveCheck.gameObject.activeSelf) objectiveCheck.gameObject.SetActive(true);
+            objectiveCheck.alpha = 0f; // keep hidden until we finish
+        }
+
         if (promptLabel) promptLabel.text = promptText;
         ShowPrompt(false);
         ShowHold(false);
@@ -297,5 +308,28 @@ public class RepairableFixable : MonoBehaviour
 
         foreach (var go in enableOnComplete) if (go) go.SetActive(true);
         foreach (var go in disableOnComplete) if (go) go.SetActive(false);
+
+        // Fade in the objective checkmark
+        if (objectiveCheck) StartCoroutine(FadeIn(objectiveCheck, checkFadeDuration));
+    }
+
+    private System.Collections.IEnumerator FadeIn(CanvasGroup cg, float duration)
+    {
+        if (!cg) yield break;
+        if (!cg.gameObject.activeSelf) cg.gameObject.SetActive(true);
+
+        float t = 0f;
+        cg.alpha = 0f;
+        while (t < duration)
+        {
+            t += Time.unscaledDeltaTime;   // unscaled so it still fades if you pause
+            cg.alpha = Mathf.Lerp(0f, 1f, t / duration);
+            yield return null;
+        }
+        cg.alpha = 1f;
+
     }
 }
+
+
+
