@@ -13127,13 +13127,13 @@ MonoBehaviour:
   needle: {fileID: 1623018116}
   successSlice: {fileID: 627980846}
   successCenterDeg: 300
-  successArcDeg: 30
-  needleSpeedDegPerSec: 200
+  successArcDeg: 50
+  needleSpeedDegPerSec: 150
   skillCheckEverySeconds: {x: 2.5, y: 5}
   pressGraceSeconds: 0.15
   successBonus: 0.12
   failPenalty: 0.18
-  useUnscaledTimeForSkill: 1
+  useUnscaledTimeForSkill: 0
   enableOnComplete:
   - {fileID: 265805735}
   disableOnComplete: []
@@ -47088,7 +47088,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1419369563
 RectTransform:
   m_ObjectHideFlags: 0
@@ -52772,9 +52772,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 50}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -26.045486, y: 21.854813}
   m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1623018117
 MonoBehaviour:
   m_ObjectHideFlags: 0
