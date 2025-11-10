@@ -56,6 +56,34 @@ public class RepairableFixable : MonoBehaviour
 
 
     private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°=up
+    // ---- Skill-check feedback ----
+[Header("Skill Check Feedback")]
+[SerializeField] private AudioSource sfxSource;    // success only
+[SerializeField] private AudioClip successClip;
+[SerializeField] private AudioClip failClip;
+[SerializeField, Range(0f, 1f)] private float failVolume = 1f;
+// Use ONE of the following:
+// A) Drag a prefab here to instantiate on fail:
+[SerializeField] private ParticleSystem failExplosionPrefab;
+
+// B) Or drag an existing ParticleSystem in the scene to just Play():
+[SerializeField] private ParticleSystem failExplosionInScene;
+
+[Tooltip("Where to place the explosion. If null, uses this object's position.")]
+[SerializeField] private Transform explosionSpawnPoint;
+
+[Tooltip("If using a prefab, parent the spawned VFX to this object (so it follows).")]
+[SerializeField] private bool attachExplosionToThis = false;
+
+[SerializeField] private CanvasGroup failFlashGroup; // red overlay (alpha 0 by default)
+[SerializeField] private float failFlashIn = 0.08f;
+[SerializeField] private float failFlashHold = 0.05f;
+[SerializeField] private float failFlashOut = 0.20f;
+[SerializeField] private bool useUnscaledTimeForFX = true;
+[SerializeField] private AudioClip skillAppearClip;
+[SerializeField, Range(0f, 1f)] private float skillAppearVolume = 1f;
+
+
 
     [Header("Finish")]
     [SerializeField] private GameObject[] enableOnComplete;
@@ -79,6 +107,11 @@ public class RepairableFixable : MonoBehaviour
 
     private void OnEnable()
     {
+          if (failFlashGroup)
+    {
+        if (!failFlashGroup.gameObject.activeSelf) failFlashGroup.gameObject.SetActive(true);
+        failFlashGroup.alpha = 0f;
+    }
         if (objectiveCheck)
         {
             if (!objectiveCheck.gameObject.activeSelf) objectiveCheck.gameObject.SetActive(true);
@@ -206,12 +239,16 @@ public class RepairableFixable : MonoBehaviour
             if (IsNeedleInSuccess())
             {
                 progress01 = Mathf.Clamp01(progress01 + successBonus);
+                DoSuccessFeedback(); 
                 EndSkillCheck();
                 ScheduleNextSkillCheck();
             }
             else
             {
                 progress01 = Mathf.Clamp01(progress01 - failPenalty);
+                DoFailFeedback();
+                PlayFailSfx();
+                TriggerFailExplosion();
                 EndSkillCheck();
                 nextSkillCheckTime = Time.time + 1.25f;
             }
@@ -221,6 +258,7 @@ public class RepairableFixable : MonoBehaviour
         if (enteredZoneTime > 0f && (useUnscaledTimeForSkill ? Time.unscaledTime : Time.time) - enteredZoneTime > pressGraceSeconds && !IsNeedleInSuccess())
         {
             progress01 = Mathf.Clamp01(progress01 - failPenalty);
+            DoFailFeedback();  
             EndSkillCheck();
             nextSkillCheckTime = Time.time + 1.25f;
         }
@@ -242,6 +280,7 @@ public class RepairableFixable : MonoBehaviour
     SetupDial();
 
     ShowSkill(true);
+    PlaySkillAppearSfx(); 
 
     // ALWAYS start at the top (0° = up in our clock convention)
     needleAngleClock = 0f;
@@ -331,6 +370,115 @@ public class RepairableFixable : MonoBehaviour
         cg.alpha = 1f;
 
     }
+    private void PlaySuccessSfx()
+{
+    if (successClip == null) return;
+    if (sfxSource != null)
+        sfxSource.PlayOneShot(successClip);
+    else
+        AudioSource.PlayClipAtPoint(successClip, transform.position);
+}
+
+private System.Collections.IEnumerator FlashFailRed()
+{
+    if (!failFlashGroup) yield break;
+
+    float dt() => useUnscaledTimeForFX ? Time.unscaledDeltaTime : Time.deltaTime;
+
+    // Fade in
+    failFlashGroup.alpha = 0f;
+    float t = 0f;
+    while (t < failFlashIn)
+    {
+        t += dt();
+        failFlashGroup.alpha = Mathf.Lerp(0f, 1f, t / failFlashIn);
+        yield return null;
+    }
+    failFlashGroup.alpha = 1f;
+
+    // Hold
+    t = 0f;
+    while (t < failFlashHold)
+    {
+        t += dt();
+        yield return null;
+    }
+
+    // Fade out
+    t = 0f;
+    while (t < failFlashOut)
+    {
+        t += dt();
+        failFlashGroup.alpha = Mathf.Lerp(1f, 0f, t / failFlashOut);
+        yield return null;
+    }
+    failFlashGroup.alpha = 0f;
+}
+
+private void DoFailFeedback()
+{
+        
+    StartCoroutine(FlashFailRed());
+    PlayFailSfx();
+    TriggerFailExplosion();
+}
+
+    private void DoSuccessFeedback()
+    {
+        // Sound only
+        PlaySuccessSfx();
+    }
+   private void PlayFailSfx()
+{
+    if (failClip == null) return;
+
+    if (sfxSource != null)
+        sfxSource.PlayOneShot(failClip, failVolume);
+    else
+        AudioSource.PlayClipAtPoint(failClip, transform.position, failVolume);
+}
+
+private void TriggerFailExplosion()
+{
+    // Priority: in-scene system (just play it) -> prefab (instantiate)
+    if (failExplosionInScene != null)
+    {
+        var pos = explosionSpawnPoint ? explosionSpawnPoint.position : transform.position;
+        failExplosionInScene.transform.position = pos;
+        // Optional: match rotation
+        if (explosionSpawnPoint) failExplosionInScene.transform.rotation = explosionSpawnPoint.rotation;
+        failExplosionInScene.Play(true);
+        return;
+    }
+
+    if (failExplosionPrefab != null)
+    {
+        var pos = explosionSpawnPoint ? explosionSpawnPoint.position : transform.position;
+        var rot = explosionSpawnPoint ? explosionSpawnPoint.rotation : Quaternion.identity;
+        var parent = attachExplosionToThis ? transform : null;
+
+        var ps = Instantiate(failExplosionPrefab, pos, rot, parent);
+        ps.Play(true);
+
+        // Clean up once finished (safe lifetime calculation)
+        var main = ps.main;
+        float killAfter = main.duration + main.startLifetime.constantMax + 0.5f;
+        Destroy(ps.gameObject, killAfter);
+    }
+}
+
+    
+private void PlaySkillAppearSfx()
+{
+    if (skillAppearClip == null) return;
+
+    if (sfxSource != null)
+        sfxSource.PlayOneShot(skillAppearClip, skillAppearVolume);
+    else
+        AudioSource.PlayClipAtPoint(skillAppearClip, transform.position, skillAppearVolume);
+}
+
+
 }
 
 

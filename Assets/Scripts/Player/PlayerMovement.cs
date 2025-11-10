@@ -296,8 +296,8 @@ public class PlayerMovement : MonoBehaviour
             }
             else if (ctx.canceled)
             {
-                if (HasSpaceFor(standingHeight))      ApplyStance(Stance.Stand);
-                else if (HasSpaceFor(crouchHeight))   ApplyStance(Stance.Crouch);
+                if (HasSpaceFor(standingHeight)) ApplyStance(Stance.Stand);
+                else if (HasSpaceFor(crouchHeight)) ApplyStance(Stance.Crouch);
             }
             return;
         }
@@ -307,8 +307,8 @@ public class PlayerMovement : MonoBehaviour
         {
             if (isCrawling)
             {
-                if (HasSpaceFor(standingHeight))      ApplyStance(Stance.Stand);
-                else if (HasSpaceFor(crouchHeight))   ApplyStance(Stance.Crouch);
+                if (HasSpaceFor(standingHeight)) ApplyStance(Stance.Stand);
+                else if (HasSpaceFor(crouchHeight)) ApplyStance(Stance.Crouch);
             }
             else
             {
@@ -316,6 +316,14 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
+
+public void ForceEnterCrawl()
+{
+    
+    var method = GetType().GetMethod("ApplyStance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+    method?.Invoke(this, new object[] { /*Stance.Crawl*/ (object)2, /*force*/ true });
+}
+
 
     #endregion
 }
