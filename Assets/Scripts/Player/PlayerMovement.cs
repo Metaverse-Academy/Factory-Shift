@@ -47,7 +47,25 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float idleDeadzone = 0.05f;
     [Tooltip("If true, we’ll rotate the model toward planar movement direction (useful for 3rd-person).")]
     [SerializeField] private bool rotateModelToMove = false;
-    [SerializeField] private Transform modelRoot; // optional, for model rotation only
+    [SerializeField] private Transform modelRoot;
+    [Header("Footsteps")]
+    [Tooltip("Randomly picked for each step.")]
+    [SerializeField] private AudioClip[] footstepClips;
+    [SerializeField, Range(0f, 1f)] private float footstepVolume = 0.5f;
+    [Tooltip("Audio source position for footsteps. If null, uses this transform.")]
+    [SerializeField] private Transform footstepOrigin;
+    [Tooltip("Base steps per second when moving at walkSpeed while standing.")]
+    [SerializeField] private float baseStepsPerSecond = 1.8f;
+    [Tooltip("Stride multiplier per stance (affects cadence).")]
+    [SerializeField] private float runStrideMult = 1.75f;
+    [SerializeField] private float crouchStrideMult = 0.7f;
+    [Tooltip("Minimum horizontal speed to start footsteps.")]
+    [SerializeField] private float footstepSpeedThreshold = 0.12f;
+
+    [Header("Landing SFX (optional)")]
+    [SerializeField] private AudioClip landingClip;
+    [SerializeField, Range(0f, 1f)] private float landingVolume = 0.6f;
+
 
     private Vector3 planarMoveDir;
     private Rigidbody rb;
@@ -57,6 +75,8 @@ public class PlayerMovement : MonoBehaviour
     private bool isSprinting;
     private bool isCrouching;
     private bool isCrawling;
+    private float stepAccumulator;   
+    private bool  wasGrounded;
 
     private float initialCapsuleRadius;
     private Vector3 initialCapsuleCenter;
@@ -88,6 +108,9 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = Physics.Raycast(rayOrigin, Vector3.down, groundDistanceCheck, groundLayer, QueryTriggerInteraction.Ignore);
 
         UpdateAnimator();
+        HandleFootsteps();
+        HandleLandingSfx();
+
     }
 
     private void HandleMovement()
@@ -317,12 +340,66 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-public void ForceEnterCrawl()
-{
-    
-    var method = GetType().GetMethod("ApplyStance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-    method?.Invoke(this, new object[] { /*Stance.Crawl*/ (object)2, /*force*/ true });
+    public void ForceEnterCrawl()
+    {
+
+        var method = GetType().GetMethod("ApplyStance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        method?.Invoke(this, new object[] { /*Stance.Crawl*/ (object)2, /*force*/ true });
+    }
+    private void HandleFootsteps()
+    {
+        if (footstepClips == null || footstepClips.Length == 0) return;
+
+        // Horizontal speed
+        Vector3 v = rb.linearVelocity;                 
+        float horizSpeed = new Vector3(v.x, 0f, v.z).magnitude;
+
+        // Only when grounded and actually moving
+        if (!isGrounded || horizSpeed < footstepSpeedThreshold  || isCrawling)
+        {
+            // Decay accumulator a bit so quick taps don't instantly fire
+            stepAccumulator = Mathf.Max(0f, stepAccumulator - Time.deltaTime);
+            return;
+        }
+
+        // Determine stride/cadence multiplier by stance
+          float strideMult = 1f;
+    if (isCrouching) strideMult = crouchStrideMult;
+    else if (isSprinting) strideMult = runStrideMult;
+
+    float relSpeed = Mathf.Clamp(horizSpeed / Mathf.Max(0.01f, walkSpeed), 0f, 3f);
+    float stepsPerSec = baseStepsPerSecond * relSpeed * strideMult;
+
+    float interval = (stepsPerSec <= 0.01f) ? 999f : (1f / stepsPerSec);
+    stepAccumulator += Time.deltaTime;
+
+    if (stepAccumulator >= interval)
+    {
+        stepAccumulator -= interval;
+        PlayFootstep();
+    }
 }
+
+    private void PlayFootstep()
+    {
+        var clip = footstepClips[Random.Range(0, footstepClips.Length)];
+        Vector3 pos = footstepOrigin ? footstepOrigin.position : transform.position;
+        AudioSource.PlayClipAtPoint(clip, pos, footstepVolume);
+    }
+private void HandleLandingSfx()
+{
+    if (landingClip == null) { wasGrounded = isGrounded; return; }
+
+    if (!wasGrounded && isGrounded)
+    {
+        Vector3 pos = footstepOrigin ? footstepOrigin.position : transform.position;
+        AudioSource.PlayClipAtPoint(landingClip, pos, landingVolume);
+        stepAccumulator = 0f;
+    }
+
+    wasGrounded = isGrounded;
+}
+
 
 
     #endregion

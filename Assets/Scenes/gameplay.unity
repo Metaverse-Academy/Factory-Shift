@@ -44948,6 +44948,25 @@ MonoBehaviour:
   idleDeadzone: 0.25
   rotateModelToMove: 0
   modelRoot: {fileID: 0}
+  footstepClips:
+  - {fileID: 8300000, guid: cf1a9d6653431394595a762f3626a553, type: 3}
+  - {fileID: 8300000, guid: 0e0a289ccc3075f419c75e5a6da32842, type: 3}
+  - {fileID: 8300000, guid: 6e01755b30e50fb4397f12e66d8f4c55, type: 3}
+  - {fileID: 8300000, guid: 268f78f5ccd409e4f8dfee47123d4b24, type: 3}
+  - {fileID: 8300000, guid: 7e8b37b9547cb7f47a134b49422b7b93, type: 3}
+  - {fileID: 8300000, guid: 17bce3714f421d3459d89b7d33dd8e0b, type: 3}
+  - {fileID: 8300000, guid: 31a51afafd47e6c49963df4d10844fd6, type: 3}
+  - {fileID: 8300000, guid: 3804784351ee7864ea43ef09ab2349c2, type: 3}
+  - {fileID: 8300000, guid: e9871a0ebedcc5542ba31cb66a3e7a71, type: 3}
+  - {fileID: 8300000, guid: b6cecd2baa784034ea79afe82a02d5f6, type: 3}
+  footstepVolume: 0.727
+  footstepOrigin: {fileID: 0}
+  baseStepsPerSecond: 1.8
+  runStrideMult: 1
+  crouchStrideMult: 1
+  footstepSpeedThreshold: 0.12
+  landingClip: {fileID: 0}
+  landingVolume: 0.6
 --- !u!54 &1299704013
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -54828,7 +54847,7 @@ AudioSource:
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 128
+  Priority: 183
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 500
