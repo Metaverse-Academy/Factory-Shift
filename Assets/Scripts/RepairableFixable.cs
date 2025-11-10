@@ -60,10 +60,31 @@ public class RepairableFixable : MonoBehaviour
 [Header("Skill Check Feedback")]
 [SerializeField] private AudioSource sfxSource;    // success only
 [SerializeField] private AudioClip successClip;
+
+[SerializeField, Range(0f, 1f)] private float successVolume = 1f;
 [SerializeField] private AudioClip failClip;
 [SerializeField, Range(0f, 1f)] private float failVolume = 1f;
-// Use ONE of the following:
-// A) Drag a prefab here to instantiate on fail:
+// ===== Repair SFX (loop while repairing) =====
+[Header("Repair Loop SFX")]
+[SerializeField] private AudioSource repairSource;   // add an AudioSource, Play On Awake OFF
+[SerializeField] private AudioClip repairLoop;       // your loop/ambience clip
+[SerializeField, Range(0f,1f)] private float repairVolume = 0.8f;
+[Header("Repair Complete SFX")]
+[SerializeField] private AudioClip repairCompleteClip; // assign your "generator complete" sound
+[SerializeField, Range(0f,1f)] private float repairCompleteVolume = 1f;
+[SerializeField] private float repairFadeIn = 0.12f;
+[SerializeField] private float repairFadeOut = 0.20f;
+
+// If true, the loop only plays while the player is actively holding F.
+// If false (default), the loop starts the first time they begin repairing and
+// continues across pauses until the generator is complete.
+[SerializeField] private bool loopOnlyWhileHolding = false;
+
+// internal
+private bool repairLoopPlaying;
+private bool wasHolding;
+
+
 [SerializeField] private ParticleSystem failExplosionPrefab;
 
 // B) Or drag an existing ParticleSystem in the scene to just Play():
@@ -189,6 +210,23 @@ public class RepairableFixable : MonoBehaviour
             repaired = true;
             CompleteRepair();
         }
+        // Track transitions
+bool holdingNow = holding;
+if (holdingNow && !wasHolding)
+{
+    // began holding this frame
+    StartRepairLoopIfNeeded();
+    if (loopOnlyWhileHolding == true && repairSource && repairLoopPlaying && !repairSource.isPlaying)
+        repairSource.Play();
+}
+else if (!holdingNow && wasHolding)
+{
+    // released this frame
+    if (loopOnlyWhileHolding == true)
+        StopRepairLoop(false); // fade out when they stop holding
+}
+wasHolding = holdingNow;
+
     }
 
     // ------------ UI helpers ------------
@@ -346,6 +384,8 @@ public class RepairableFixable : MonoBehaviour
         ShowPrompt(false);
         ShowHold(false);
         CancelSkillCheck();
+        StopRepairLoop(false);
+        PlayRepairCompleteSfx(); 
 
         foreach (var go in enableOnComplete) if (go) go.SetActive(true);
         foreach (var go in disableOnComplete) if (go) go.SetActive(false);
@@ -371,13 +411,25 @@ public class RepairableFixable : MonoBehaviour
 
     }
     private void PlaySuccessSfx()
+    {
+        if (successClip == null) return;
+
+        if (sfxSource != null)
+            sfxSource.PlayOneShot(successClip, successVolume);
+        else
+            AudioSource.PlayClipAtPoint(successClip, transform.position, successVolume);
+    }
+private void PlayRepairCompleteSfx()
 {
-    if (successClip == null) return;
+    if (repairCompleteClip == null) return;
+
     if (sfxSource != null)
-        sfxSource.PlayOneShot(successClip);
+        sfxSource.PlayOneShot(repairCompleteClip, repairCompleteVolume);
     else
-        AudioSource.PlayClipAtPoint(successClip, transform.position);
+        AudioSource.PlayClipAtPoint(repairCompleteClip, transform.position, repairCompleteVolume);
 }
+
+
 
 private System.Collections.IEnumerator FlashFailRed()
 {
@@ -467,16 +519,59 @@ private void TriggerFailExplosion()
     }
 }
 
-    
-private void PlaySkillAppearSfx()
-{
-    if (skillAppearClip == null) return;
 
-    if (sfxSource != null)
-        sfxSource.PlayOneShot(skillAppearClip, skillAppearVolume);
-    else
-        AudioSource.PlayClipAtPoint(skillAppearClip, transform.position, skillAppearVolume);
+    private void PlaySkillAppearSfx()
+    {
+        if (skillAppearClip == null) return;
+
+        if (sfxSource != null)
+            sfxSource.PlayOneShot(skillAppearClip, skillAppearVolume);
+        else
+            AudioSource.PlayClipAtPoint(skillAppearClip, transform.position, skillAppearVolume);
+    }
+private System.Collections.IEnumerator FadeVolume(AudioSource src, float from, float to, float duration, bool stopAtEnd)
+{
+    if (!src) yield break;
+    float t = 0f;
+    src.volume = from;
+    while (t < duration)
+    {
+        t += Time.unscaledDeltaTime;
+        src.volume = Mathf.Lerp(from, to, Mathf.Clamp01(t / duration));
+        yield return null;
+    }
+    src.volume = to;
+    if (stopAtEnd && Mathf.Approximately(to, 0f)) src.Stop();
 }
+
+private void StartRepairLoopIfNeeded()
+{
+    if (!repairSource || !repairLoop || repairLoopPlaying) return;
+
+    repairSource.loop = true;
+    repairSource.clip = repairLoop;
+    repairSource.volume = 0f;
+    repairSource.Play();
+    StartCoroutine(FadeVolume(repairSource, 0f, repairVolume, repairFadeIn, false));
+    repairLoopPlaying = true;
+}
+
+private void StopRepairLoop(bool immediate = false)
+{
+    if (!repairSource || !repairLoopPlaying) return;
+
+    if (immediate || repairFadeOut <= 0f)
+    {
+        repairSource.Stop();
+        repairSource.volume = 0f;
+    }
+    else
+    {
+        StartCoroutine(FadeVolume(repairSource, repairSource.volume, 0f, repairFadeOut, true));
+    }
+    repairLoopPlaying = false;
+}
+
 
 
 }
