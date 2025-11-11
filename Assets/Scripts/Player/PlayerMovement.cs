@@ -1,3 +1,4 @@
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -80,6 +81,9 @@ public class PlayerMovement : MonoBehaviour
 
     private float initialCapsuleRadius;
     private Vector3 initialCapsuleCenter;
+
+    public float LookaheadSettings { get; private set; }
+    public Vector3 Velocity { get; private set; }
 
     private enum Stance { Stand, Crouch, Crawl }
 
@@ -210,6 +214,15 @@ public class PlayerMovement : MonoBehaviour
         bool blocked = Physics.CheckCapsule(feet, head, radius, maskNoSelf, QueryTriggerInteraction.Ignore);
         return !blocked;
     }
+    public void Teleport(Vector3 position, Quaternion rotation)
+    {
+        transform.position = position;
+        Physics.SyncTransforms();
+        LookaheadSettings = rotation.eulerAngles.y;
+        LookaheadSettings = rotation.eulerAngles.z;
+        Velocity = Vector3.zero;
+
+    } 
 
     private void UpdateAnimator()
     {
@@ -399,6 +412,11 @@ private void HandleLandingSfx()
 
     wasGrounded = isGrounded;
 }
+
+   // internal void Teleport(Vector3 position, Quaternion rotation)
+    //{
+       // throw new System.NotImplementedException();
+    //}
 
 
 
