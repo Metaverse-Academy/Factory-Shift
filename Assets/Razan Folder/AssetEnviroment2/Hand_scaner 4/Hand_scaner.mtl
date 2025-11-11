@@ -1,0 +1,34 @@
+# Blender 4.4.3 MTL File: 'Hand_scaner.blend'
+# www.blender.org
+
+newmtl Door_Scan
+Ks 0.500000 0.500000 0.500000
+Ni 1.500000
+d 1.000000
+illum 3
+Pm 0.290909
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd Textures/Scan_door_Albedo.png
+map_Pr Textures/Scan_door_Roughness.png
+map_Ke Textures/Scan_door_Emission.png
+map_Bump -bm 1.000000 Textures/Scan_door_Normal.png
+
+newmtl hand_scan_back
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd Textures/Hand_scaner_backdoor_Material_BaseColor.png
+map_Pm Textures/Hand_scaner_backdoor_Material_Metallic.png
+map_Pr Textures/Hand_scaner_backdoor_Material_Roughness.png
+map_Bump -bm 1.000000 Textures/Hand_scaner_backdoor_Material_Normal.png
