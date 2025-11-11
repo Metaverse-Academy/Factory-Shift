@@ -5329,6 +5329,40 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: db90a77efe2e41f438b4f71f4dbca71e, type: 3}
+--- !u!1 &174813484
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 174813485}
+  m_Layer: 0
+  m_Name: Audio sources
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &174813485
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 174813484}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -85.46725, y: 5.28221, z: -71.22187}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 543973111}
+  - {fileID: 454723755}
+  - {fileID: 1005191815}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &177326747
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13413,7 +13447,7 @@ GameObject:
   m_Component:
   - component: {fileID: 400714698}
   m_Layer: 0
-  m_Name: ex
+  m_Name: EXPLOSION TRANSFORM
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14887,7 +14921,7 @@ GameObject:
   - component: {fileID: 454723755}
   - component: {fileID: 454723754}
   m_Layer: 0
-  m_Name: 'complete sound '
+  m_Name: complete source
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14998,12 +15032,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 454723753}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -85.46762, y: 5.2822, z: -71.22187}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.00037384033, y: -0.00001001358, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 174813485}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &459719487 stripped
 MonoBehaviour:
@@ -17710,7 +17744,7 @@ GameObject:
   - component: {fileID: 543973111}
   - component: {fileID: 543973110}
   m_Layer: 0
-  m_Name: reparing sound
+  m_Name: reparing source
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17821,12 +17855,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 543973109}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -85.46767, y: 5.2822, z: -71.22187}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.0004196167, y: -0.00001001358, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 174813485}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &544363675 stripped
 Transform:
@@ -36178,7 +36212,7 @@ GameObject:
   - component: {fileID: 1005191815}
   - component: {fileID: 1005191816}
   m_Layer: 0
-  m_Name: SKILLCHECKAUDIO
+  m_Name: Skillcheck source
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -36192,12 +36226,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1005191814}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 85.46725, y: -5.28221, z: 71.22187}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 174813485}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &1005191816
 AudioSource:
@@ -70329,10 +70363,8 @@ SceneRoots:
   - {fileID: 1646700875}
   - {fileID: 771247573}
   - {fileID: 1066023388}
-  - {fileID: 1005191815}
   - {fileID: 400714698}
   - {fileID: 867026471}
   - {fileID: 1308221181}
   - {fileID: 1993825401}
-  - {fileID: 543973111}
-  - {fileID: 454723755}
+  - {fileID: 174813485}
