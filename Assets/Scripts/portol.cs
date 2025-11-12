@@ -9,6 +9,7 @@ public class portol : MonoBehaviour
         if (other.CompareTag("Player") && other.TryGetComponent<PlayerMovement>(out var player))
         {
             player.Teleport(destination.position, destination.rotation);
+            player.ForceEnterCrawl(); 
         }
     }
     void OnDrawGizmos()

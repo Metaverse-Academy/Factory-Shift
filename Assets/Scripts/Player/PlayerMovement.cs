@@ -215,14 +215,20 @@ public class PlayerMovement : MonoBehaviour
         return !blocked;
     }
     public void Teleport(Vector3 position, Quaternion rotation)
-    {
-        transform.position = position;
-        Physics.SyncTransforms();
-        LookaheadSettings = rotation.eulerAngles.y;
-        LookaheadSettings = rotation.eulerAngles.z;
-        Velocity = Vector3.zero;
+{
+    rb.linearVelocity = Vector3.zero;      // or rb.linearVelocity if that’s what you use
+    rb.angularVelocity = Vector3.zero;
 
-    } 
+    // yaw only
+    var yawOnly = Quaternion.Euler(0f, rotation.eulerAngles.y, 0f);
+    transform.SetPositionAndRotation(position, yawOnly);
+
+    Physics.SyncTransforms();
+    if (animator) animator.Update(0f);
+
+    // (remove those LookaheadSettings lines; they’re not used for rotation)
+}
+
 
     private void UpdateAnimator()
     {
