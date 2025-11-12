@@ -55,7 +55,7 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private float checkFadeDuration = 0.35f;
 
 
-    private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°=up
+private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°=up
     // ---- Skill-check feedback ----
 [Header("Skill Check Feedback")]
 [SerializeField] private AudioSource sfxSource;    // success only

@@ -76,8 +76,11 @@ public class PlayerMovement : MonoBehaviour
     private bool isSprinting;
     private bool isCrouching;
     private bool isCrawling;
-    private float stepAccumulator;   
-    private bool  wasGrounded;
+    private float stepAccumulator;
+    private bool wasGrounded;
+    public bool IsCrawling => isCrawling;
+    public bool IsCrouching => isCrouching;
+
 
     private float initialCapsuleRadius;
     private Vector3 initialCapsuleCenter;
@@ -361,9 +364,10 @@ public class PlayerMovement : MonoBehaviour
 
     public void ForceEnterCrawl()
     {
-
-        var method = GetType().GetMethod("ApplyStance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-        method?.Invoke(this, new object[] { /*Stance.Crawl*/ (object)2, /*force*/ true });
+         var m = GetType().GetMethod("ApplyStance",
+        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+    // Stance.Crawl = 2
+        m?.Invoke(this, new object[] { (object)2, true });
     }
     private void HandleFootsteps()
     {
@@ -405,26 +409,60 @@ public class PlayerMovement : MonoBehaviour
         Vector3 pos = footstepOrigin ? footstepOrigin.position : transform.position;
         AudioSource.PlayClipAtPoint(clip, pos, footstepVolume);
     }
-private void HandleLandingSfx()
-{
-    if (landingClip == null) { wasGrounded = isGrounded; return; }
-
-    if (!wasGrounded && isGrounded)
+    private void HandleLandingSfx()
     {
-        Vector3 pos = footstepOrigin ? footstepOrigin.position : transform.position;
-        AudioSource.PlayClipAtPoint(landingClip, pos, landingVolume);
-        stepAccumulator = 0f;
+        if (landingClip == null) { wasGrounded = isGrounded; return; }
+
+        if (!wasGrounded && isGrounded)
+        {
+            Vector3 pos = footstepOrigin ? footstepOrigin.position : transform.position;
+            AudioSource.PlayClipAtPoint(landingClip, pos, landingVolume);
+            stepAccumulator = 0f;
+        }
+
+        wasGrounded = isGrounded;
+    }
+public void ForceStand(bool force = false)
+{
+    var m = GetType().GetMethod("ApplyStance",
+        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+    // Stance.Stand = 0
+    m?.Invoke(this, new object[] { (object)0, force });
+}
+
+    public void ForceCrouch(bool force = false)
+    {
+        var m = GetType().GetMethod("ApplyStance",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        // Stance.Crouch = 1
+        m?.Invoke(this, new object[] { (object)1, force });
+    }
+    public void ExitVentUpright(bool forceStand = false)
+{
+    // If you want to always stand regardless of headroom (level design guarantees it), set forceStand = true
+    var apply = GetType().GetMethod("ApplyStance",
+        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+    // enum values in your script: Stand=0, Crouch=1, Crawl=2
+    if (forceStand)
+    {
+        apply?.Invoke(this, new object[] { (object)0, /*force*/ true });
+        return;
     }
 
-    wasGrounded = isGrounded;
+    // Respect headroom:
+    if (HasSpaceFor(standingHeight))
+        apply?.Invoke(this, new object[] { (object)0, /*force*/ true }); // Stand
+    else if (HasSpaceFor(crouchHeight))
+        apply?.Invoke(this, new object[] { (object)1, /*force*/ true }); // Crouch
+    else
+        apply?.Invoke(this, new object[] { (object)2, /*force*/ true }); // stay Crawl if truly no space
 }
+
 
    // internal void Teleport(Vector3 position, Quaternion rotation)
     //{
        // throw new System.NotImplementedException();
     //}
-
-
-
     #endregion
 }
