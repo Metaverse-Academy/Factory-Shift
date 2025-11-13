@@ -50,9 +50,7 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private float failPenalty = 0.18f;
     [SerializeField] private bool useUnscaledTimeForSkill = true;
     // --- Objective UI (checkmark) ---
-    [Header("Objective UI")]
-    [SerializeField] private CanvasGroup objectiveCheck; // CanvasGroup on the check sprite
-    [SerializeField] private float checkFadeDuration = 0.35f;
+
 
 
 private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°=up
@@ -83,6 +81,7 @@ private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°
 // internal
 private bool repairLoopPlaying;
 private bool wasHolding;
+public ObjectiveUI objectiveUI;
 
 
 [SerializeField] private ParticleSystem failExplosionPrefab;
@@ -133,12 +132,7 @@ private bool wasHolding;
         if (!failFlashGroup.gameObject.activeSelf) failFlashGroup.gameObject.SetActive(true);
         failFlashGroup.alpha = 0f;
     }
-        if (objectiveCheck)
-        {
-            if (!objectiveCheck.gameObject.activeSelf) objectiveCheck.gameObject.SetActive(true);
-            objectiveCheck.alpha = 0f; // keep hidden until we finish
-        }
-
+   
         if (promptLabel) promptLabel.text = promptText;
         ShowPrompt(false);
         ShowHold(false);
@@ -369,16 +363,10 @@ wasHolding = holdingNow;
             var rt = successSlice.rectTransform;
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
-            // For a perfect visual match set Image:
-            // - Type: Filled
-            // - Fill Method: Radial 360
-            // - Fill Origin: Top
-            // - Clockwise: ON
-            // and control its localRotation only from code above.
+           
         }
     }
 
-    // ------------ Finish ------------
     private void CompleteRepair()
     {
         ShowPrompt(false);
@@ -386,12 +374,12 @@ wasHolding = holdingNow;
         CancelSkillCheck();
         StopRepairLoop(false);
         PlayRepairCompleteSfx(); 
+        objectiveUI.CompleteAndShowNext("Go Home");
+        
 
         foreach (var go in enableOnComplete) if (go) go.SetActive(true);
         foreach (var go in disableOnComplete) if (go) go.SetActive(false);
 
-        // Fade in the objective checkmark
-        if (objectiveCheck) StartCoroutine(FadeIn(objectiveCheck, checkFadeDuration));
     }
 
     private System.Collections.IEnumerator FadeIn(CanvasGroup cg, float duration)

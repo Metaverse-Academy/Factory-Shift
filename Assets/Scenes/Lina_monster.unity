@@ -283,7 +283,7 @@ Transform:
   m_GameObject: {fileID: 312095857}
   serializedVersion: 2
   m_LocalRotation: {x: -0.0000000112449925, y: 1.2732926e-10, z: -1.5495362e-11, w: 1}
-  m_LocalPosition: {x: 0.00016238686, y: 1.6467233, z: 0.18856283}
+  m_LocalPosition: {x: -1.9498377, y: 1.6467233, z: 0.18856283}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -371,7 +371,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: c6c9c8389de7b224cbf5fea5765694c4, type: 3}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -634,7 +634,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 93070416ae5f0a141a782fddc1b3ce4a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -1.95
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 93070416ae5f0a141a782fddc1b3ce4a, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1529,6 +1529,15 @@ MonoBehaviour:
   idleDeadzone: 0.25
   rotateModelToMove: 0
   modelRoot: {fileID: 0}
+  footstepClips: []
+  footstepVolume: 0.5
+  footstepOrigin: {fileID: 0}
+  baseStepsPerSecond: 1.8
+  runStrideMult: 1.75
+  crouchStrideMult: 0.7
+  footstepSpeedThreshold: 0.12
+  landingClip: {fileID: 0}
+  landingVolume: 0.6
 --- !u!54 &1539814586
 Rigidbody:
   m_ObjectHideFlags: 0
