@@ -4,7 +4,9 @@ public class SimpleDoorController : MonoBehaviour
 {
     [Header("References")]
     public Transform player;       // اللاعب
-    public Transform doorMesh;     // المجسم الفعلي الذي يحتوي على الـMesh Renderer
+    public Transform doorMesh;     // المجسم الفعلي
+    public AudioSource audioSource; // مصدر الصوت
+    public AudioClip doorSound;     // الصوت الذي يُشغل عند فتح/إغلاق الباب
 
     [Header("Settings")]
     public float openDistance = 3f;
@@ -14,6 +16,7 @@ public class SimpleDoorController : MonoBehaviour
     private Vector3 closedPosition;
     private Vector3 openPosition;
     private bool isOpen;
+    private bool lastState; // لتتبع حالة الباب السابقة
 
     void Start()
     {
@@ -25,6 +28,7 @@ public class SimpleDoorController : MonoBehaviour
 
         closedPosition = doorMesh.position;
         openPosition = closedPosition + openOffset;
+        lastState = false;
     }
 
     void Update()
@@ -34,7 +38,18 @@ public class SimpleDoorController : MonoBehaviour
         float distance = Vector3.Distance(player.position, transform.position);
         isOpen = distance <= openDistance;
 
+        // تحريك الباب
         Vector3 target = isOpen ? openPosition : closedPosition;
         doorMesh.position = Vector3.MoveTowards(doorMesh.position, target, moveSpeed * Time.deltaTime);
+
+        // تشغيل الصوت عند تغيير حالة الباب
+        if (isOpen != lastState)
+        {
+            if (audioSource != null && doorSound != null)
+            {
+                audioSource.PlayOneShot(doorSound);
+            }
+            lastState = isOpen;
+        }
     }
 }
