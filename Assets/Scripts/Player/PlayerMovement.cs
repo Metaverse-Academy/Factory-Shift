@@ -84,25 +84,38 @@ public class PlayerMovement : MonoBehaviour
 
     private float initialCapsuleRadius;
     private Vector3 initialCapsuleCenter;
+    
+  [Header("Colliders")]
+[SerializeField] private CapsuleCollider standCollider; // vertical
+[SerializeField] private CapsuleCollider crawlCollider; // horizontal child
 
     public float LookaheadSettings { get; private set; }
     public Vector3 Velocity { get; private set; }
 
     private enum Stance { Stand, Crouch, Crawl }
 
-    private void Awake()
-    {
-        rb = GetComponent<Rigidbody>();
-        capsule = GetComponent<CapsuleCollider>();
+private void Awake()
+{
+    rb = GetComponent<Rigidbody>();
 
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationY;
+    // if not assigned in inspector, assume the one on this GameObject is the standing collider
+    if (!standCollider) standCollider = GetComponent<CapsuleCollider>();
+    capsule = standCollider;                  // use vertical as our main capsule reference
 
-        initialCapsuleRadius = capsule.radius;
-        initialCapsuleCenter = capsule.center;
+    if (crawlCollider)
+        crawlCollider.enabled = false;        // disable prone collider at start
 
-        ApplyStance(Stance.Stand, force: true);
-    }
+    rb.interpolation = RigidbodyInterpolation.Interpolate;
+    rb.constraints = RigidbodyConstraints.FreezeRotationX |
+                     RigidbodyConstraints.FreezeRotationZ |
+                     RigidbodyConstraints.FreezeRotationY;
+
+    initialCapsuleRadius = capsule.radius;
+    initialCapsuleCenter = capsule.center;
+
+    ApplyStance(Stance.Stand, force: true);
+}
+
 
     private void FixedUpdate()
     {
@@ -148,57 +161,82 @@ public class PlayerMovement : MonoBehaviour
 
     // ---- Stance management ----
     private void ApplyStance(Stance stance, bool force = false)
+{
+    float targetHeight = standingHeight;
+    float camY = camY_Stand;
+
+    // ------------ choose target height & camera Y ------------
+    switch (stance)
     {
-        float targetHeight = standingHeight;
-        float camY = camY_Stand;
+        case Stance.Stand:
+            targetHeight = standingHeight;
+            camY = camY_Stand;
+            break;
 
-        switch (stance)
-        {
-            case Stance.Stand:
-                targetHeight = standingHeight;
-                camY = camY_Stand;
-                break;
-            case Stance.Crouch:
-                targetHeight = crouchHeight;
-                camY = camY_Crouch;
-                break;
-            case Stance.Crawl:
-                targetHeight = crawlHeight;
-                camY = camY_Crawl;
-                break;
-        }
+        case Stance.Crouch:
+            targetHeight = crouchHeight;
+            camY = camY_Crouch;
+            break;
 
-        if (!force)
-        {
-            float currentHeight = capsule.height;
-            bool gettingTaller = targetHeight > currentHeight + 0.001f;
-            if (gettingTaller && !HasSpaceFor(targetHeight))
-                return;
-        }
-
-        // Flags
-        isCrawling = (stance == Stance.Crawl);
-        isCrouching = (stance == Stance.Crouch);
-        if (isCrouching || isCrawling) isSprinting = false; // can’t sprint while low
-
-        // Collider resize keeping feet anchored
-        capsule.height = targetHeight;
-        capsule.center = new Vector3(initialCapsuleCenter.x, targetHeight * 0.5f, initialCapsuleCenter.z);
-
-        // Camera offset
-        if (cameraTransform != null)
-        {
-            Vector3 lp = cameraTransform.localPosition;
-            cameraTransform.localPosition = new Vector3(lp.x, camY, lp.z);
-        }
-
-        // Animator stance flags immediately
-        if (animator)
-        {
-            animator.SetBool("Crouch", isCrouching);
-            animator.SetBool("Crawl",  isCrawling);
-        }
+        case Stance.Crawl:
+            // we won’t use the vertical capsule for crawl,
+            // only change camera height here
+            camY = camY_Crawl;
+            break;
     }
+
+    // ------------ space check only when getting taller AND using vertical collider ------------
+    bool usingVertical = (stance == Stance.Stand || stance == Stance.Crouch);
+    if (usingVertical && !force)
+    {
+        float currentHeight = capsule.height;
+        bool gettingTaller = targetHeight > currentHeight + 0.001f;
+        if (gettingTaller && !HasSpaceFor(targetHeight))
+            return;
+    }
+
+    // ------------ flags ------------
+    isCrawling  = (stance == Stance.Crawl);
+    isCrouching = (stance == Stance.Crouch);
+    if (isCrouching || isCrawling) isSprinting = false;
+
+    // ------------ collider switching ------------
+    if (usingVertical)
+    {
+        // Stand / Crouch → vertical collider ON, crawl collider OFF
+        if (standCollider) standCollider.enabled = true;
+        if (crawlCollider) crawlCollider.enabled = false;
+
+        // resize vertical capsule (feet anchored using your old logic / center)
+        capsule.height = targetHeight;
+        capsule.center = new Vector3(
+            initialCapsuleCenter.x,
+            targetHeight * 0.5f,
+            initialCapsuleCenter.z
+        );
+    }
+    else
+    {
+        // Crawl → vertical collider OFF, prone collider ON
+        if (standCollider) standCollider.enabled = false;
+        if (crawlCollider) crawlCollider.enabled = true;
+    }
+
+    // ------------ camera offset ------------
+    if (cameraTransform != null)
+    {
+        Vector3 lp = cameraTransform.localPosition;
+        cameraTransform.localPosition = new Vector3(lp.x, camY, lp.z);
+    }
+
+    // ------------ animator flags ------------
+    if (animator)
+    {
+        animator.SetBool("Crouch", isCrouching);
+        animator.SetBool("Crawl",  isCrawling);
+    }
+}
+
 
     private bool HasSpaceFor(float targetHeight)
     {

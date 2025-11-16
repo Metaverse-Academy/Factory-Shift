@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/gameplay.unity
     guid: c5c925ecd52a4ad4eab48c0e685b0111
+  - enabled: 1
+    path: Assets/Scenes/paycheck.unity
+    guid: 121b61a4972ac5b4e9ffedd73b68177b
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
