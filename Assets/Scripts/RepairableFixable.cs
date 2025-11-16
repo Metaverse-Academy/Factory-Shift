@@ -49,8 +49,61 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private float successBonus = 0.12f;
     [SerializeField] private float failPenalty = 0.18f;
     [SerializeField] private bool useUnscaledTimeForSkill = true;
+    // --- Objective UI (checkmark) ---
 
-    private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°=up
+
+
+private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°=up
+    // ---- Skill-check feedback ----
+[Header("Skill Check Feedback")]
+[SerializeField] private AudioSource sfxSource;    // success only
+[SerializeField] private AudioClip successClip;
+
+[SerializeField, Range(0f, 1f)] private float successVolume = 1f;
+[SerializeField] private AudioClip failClip;
+[SerializeField, Range(0f, 1f)] private float failVolume = 1f;
+// ===== Repair SFX (loop while repairing) =====
+[Header("Repair Loop SFX")]
+[SerializeField] private AudioSource repairSource;   // add an AudioSource, Play On Awake OFF
+[SerializeField] private AudioClip repairLoop;       // your loop/ambience clip
+[SerializeField, Range(0f,1f)] private float repairVolume = 0.8f;
+[Header("Repair Complete SFX")]
+[SerializeField] private AudioClip repairCompleteClip; // assign your "generator complete" sound
+[SerializeField, Range(0f,1f)] private float repairCompleteVolume = 1f;
+[SerializeField] private float repairFadeIn = 0.12f;
+[SerializeField] private float repairFadeOut = 0.20f;
+
+// If true, the loop only plays while the player is actively holding F.
+// If false (default), the loop starts the first time they begin repairing and
+// continues across pauses until the generator is complete.
+[SerializeField] private bool loopOnlyWhileHolding = false;
+
+// internal
+private bool repairLoopPlaying;
+private bool wasHolding;
+public ObjectiveUI objectiveUI;
+
+
+[SerializeField] private ParticleSystem failExplosionPrefab;
+
+// B) Or drag an existing ParticleSystem in the scene to just Play():
+[SerializeField] private ParticleSystem failExplosionInScene;
+
+[Tooltip("Where to place the explosion. If null, uses this object's position.")]
+[SerializeField] private Transform explosionSpawnPoint;
+
+[Tooltip("If using a prefab, parent the spawned VFX to this object (so it follows).")]
+[SerializeField] private bool attachExplosionToThis = false;
+
+[SerializeField] private CanvasGroup failFlashGroup; // red overlay (alpha 0 by default)
+[SerializeField] private float failFlashIn = 0.08f;
+[SerializeField] private float failFlashHold = 0.05f;
+[SerializeField] private float failFlashOut = 0.20f;
+[SerializeField] private bool useUnscaledTimeForFX = true;
+[SerializeField] private AudioClip skillAppearClip;
+[SerializeField, Range(0f, 1f)] private float skillAppearVolume = 1f;
+
+
 
     [Header("Finish")]
     [SerializeField] private GameObject[] enableOnComplete;
@@ -74,6 +127,12 @@ public class RepairableFixable : MonoBehaviour
 
     private void OnEnable()
     {
+          if (failFlashGroup)
+    {
+        if (!failFlashGroup.gameObject.activeSelf) failFlashGroup.gameObject.SetActive(true);
+        failFlashGroup.alpha = 0f;
+    }
+   
         if (promptLabel) promptLabel.text = promptText;
         ShowPrompt(false);
         ShowHold(false);
@@ -145,6 +204,23 @@ public class RepairableFixable : MonoBehaviour
             repaired = true;
             CompleteRepair();
         }
+        // Track transitions
+bool holdingNow = holding;
+if (holdingNow && !wasHolding)
+{
+    // began holding this frame
+    StartRepairLoopIfNeeded();
+    if (loopOnlyWhileHolding == true && repairSource && repairLoopPlaying && !repairSource.isPlaying)
+        repairSource.Play();
+}
+else if (!holdingNow && wasHolding)
+{
+    // released this frame
+    if (loopOnlyWhileHolding == true)
+        StopRepairLoop(false); // fade out when they stop holding
+}
+wasHolding = holdingNow;
+
     }
 
     // ------------ UI helpers ------------
@@ -195,12 +271,16 @@ public class RepairableFixable : MonoBehaviour
             if (IsNeedleInSuccess())
             {
                 progress01 = Mathf.Clamp01(progress01 + successBonus);
+                DoSuccessFeedback(); 
                 EndSkillCheck();
                 ScheduleNextSkillCheck();
             }
             else
             {
                 progress01 = Mathf.Clamp01(progress01 - failPenalty);
+                DoFailFeedback();
+                PlayFailSfx();
+                TriggerFailExplosion();
                 EndSkillCheck();
                 nextSkillCheckTime = Time.time + 1.25f;
             }
@@ -210,6 +290,7 @@ public class RepairableFixable : MonoBehaviour
         if (enteredZoneTime > 0f && (useUnscaledTimeForSkill ? Time.unscaledTime : Time.time) - enteredZoneTime > pressGraceSeconds && !IsNeedleInSuccess())
         {
             progress01 = Mathf.Clamp01(progress01 - failPenalty);
+            DoFailFeedback();  
             EndSkillCheck();
             nextSkillCheckTime = Time.time + 1.25f;
         }
@@ -222,26 +303,29 @@ public class RepairableFixable : MonoBehaviour
         }
     }
 
-    private void StartSkillCheck()
-    {
-        skillActive = true;
-        enteredZoneTime = -999f;
+  private void StartSkillCheck()
+{
+    skillActive = true;
+    enteredZoneTime = -999f;
 
-        // ensure pivots & anchors so the needle spins like a clock hand
-        SetupDial();
+    // make sure pivots/anchors are correct so it rotates like a clock hand
+    SetupDial();
 
-        ShowSkill(true);
+    ShowSkill(true);
+    PlaySkillAppearSfx(); 
 
-        // randomize starting angle & spin direction in CLOCK space
-        needleAngleClock = Random.Range(0f, 360f);
-        if (Random.value < 0.5f) needleSpeedDegPerSec = -Mathf.Abs(needleSpeedDegPerSec);
-        else needleSpeedDegPerSec = Mathf.Abs(needleSpeedDegPerSec);
+    // ALWAYS start at the top (0° = up in our clock convention)
+    needleAngleClock = 0f;
 
-        // place/rotate success wedge in CLOCK convention
-        if (successSlice)
-            successSlice.rectTransform.localRotation =
-                Quaternion.Euler(0f, 0f, -(successCenterDeg - CLOCK_ZERO_IS_UP));
-    }
+    // ALWAYS rotate clockwise
+    needleSpeedDegPerSec = Mathf.Abs(needleSpeedDegPerSec);
+
+    // Place/rotate the success wedge in CLOCK convention (0=up)
+    if (successSlice)
+        successSlice.rectTransform.localRotation =
+            Quaternion.Euler(0f, 0f, -(successCenterDeg - CLOCK_ZERO_IS_UP));
+}
+
 
     private void EndSkillCheck()
     {
@@ -279,23 +363,206 @@ public class RepairableFixable : MonoBehaviour
             var rt = successSlice.rectTransform;
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = Vector2.zero;
-            // For a perfect visual match set Image:
-            // - Type: Filled
-            // - Fill Method: Radial 360
-            // - Fill Origin: Top
-            // - Clockwise: ON
-            // and control its localRotation only from code above.
+           
         }
     }
 
-    // ------------ Finish ------------
     private void CompleteRepair()
     {
         ShowPrompt(false);
         ShowHold(false);
         CancelSkillCheck();
+        StopRepairLoop(false);
+        PlayRepairCompleteSfx(); 
+        objectiveUI.CompleteAndShowNext("Go Home");
+        
 
         foreach (var go in enableOnComplete) if (go) go.SetActive(true);
         foreach (var go in disableOnComplete) if (go) go.SetActive(false);
+
+    }
+
+    private System.Collections.IEnumerator FadeIn(CanvasGroup cg, float duration)
+    {
+        if (!cg) yield break;
+        if (!cg.gameObject.activeSelf) cg.gameObject.SetActive(true);
+
+        float t = 0f;
+        cg.alpha = 0f;
+        while (t < duration)
+        {
+            t += Time.unscaledDeltaTime;   // unscaled so it still fades if you pause
+            cg.alpha = Mathf.Lerp(0f, 1f, t / duration);
+            yield return null;
+        }
+        cg.alpha = 1f;
+
+    }
+    private void PlaySuccessSfx()
+    {
+        if (successClip == null) return;
+
+        if (sfxSource != null)
+            sfxSource.PlayOneShot(successClip, successVolume);
+        else
+            AudioSource.PlayClipAtPoint(successClip, transform.position, successVolume);
+    }
+private void PlayRepairCompleteSfx()
+{
+    if (repairCompleteClip == null) return;
+
+    if (sfxSource != null)
+        sfxSource.PlayOneShot(repairCompleteClip, repairCompleteVolume);
+    else
+        AudioSource.PlayClipAtPoint(repairCompleteClip, transform.position, repairCompleteVolume);
+}
+
+
+
+private System.Collections.IEnumerator FlashFailRed()
+{
+    if (!failFlashGroup) yield break;
+
+    float dt() => useUnscaledTimeForFX ? Time.unscaledDeltaTime : Time.deltaTime;
+
+    // Fade in
+    failFlashGroup.alpha = 0f;
+    float t = 0f;
+    while (t < failFlashIn)
+    {
+        t += dt();
+        failFlashGroup.alpha = Mathf.Lerp(0f, 1f, t / failFlashIn);
+        yield return null;
+    }
+    failFlashGroup.alpha = 1f;
+
+    // Hold
+    t = 0f;
+    while (t < failFlashHold)
+    {
+        t += dt();
+        yield return null;
+    }
+
+    // Fade out
+    t = 0f;
+    while (t < failFlashOut)
+    {
+        t += dt();
+        failFlashGroup.alpha = Mathf.Lerp(1f, 0f, t / failFlashOut);
+        yield return null;
+    }
+    failFlashGroup.alpha = 0f;
+}
+
+private void DoFailFeedback()
+{
+        
+    StartCoroutine(FlashFailRed());
+    PlayFailSfx();
+    TriggerFailExplosion();
+}
+
+    private void DoSuccessFeedback()
+    {
+        // Sound only
+        PlaySuccessSfx();
+    }
+   private void PlayFailSfx()
+{
+    if (failClip == null) return;
+
+    if (sfxSource != null)
+        sfxSource.PlayOneShot(failClip, failVolume);
+    else
+        AudioSource.PlayClipAtPoint(failClip, transform.position, failVolume);
+}
+
+private void TriggerFailExplosion()
+{
+    // Priority: in-scene system (just play it) -> prefab (instantiate)
+    if (failExplosionInScene != null)
+    {
+        var pos = explosionSpawnPoint ? explosionSpawnPoint.position : transform.position;
+        failExplosionInScene.transform.position = pos;
+        // Optional: match rotation
+        if (explosionSpawnPoint) failExplosionInScene.transform.rotation = explosionSpawnPoint.rotation;
+        failExplosionInScene.Play(true);
+        return;
+    }
+
+    if (failExplosionPrefab != null)
+    {
+        var pos = explosionSpawnPoint ? explosionSpawnPoint.position : transform.position;
+        var rot = explosionSpawnPoint ? explosionSpawnPoint.rotation : Quaternion.identity;
+        var parent = attachExplosionToThis ? transform : null;
+
+        var ps = Instantiate(failExplosionPrefab, pos, rot, parent);
+        ps.Play(true);
+
+        // Clean up once finished (safe lifetime calculation)
+        var main = ps.main;
+        float killAfter = main.duration + main.startLifetime.constantMax + 0.5f;
+        Destroy(ps.gameObject, killAfter);
     }
 }
+
+
+    private void PlaySkillAppearSfx()
+    {
+        if (skillAppearClip == null) return;
+
+        if (sfxSource != null)
+            sfxSource.PlayOneShot(skillAppearClip, skillAppearVolume);
+        else
+            AudioSource.PlayClipAtPoint(skillAppearClip, transform.position, skillAppearVolume);
+    }
+private System.Collections.IEnumerator FadeVolume(AudioSource src, float from, float to, float duration, bool stopAtEnd)
+{
+    if (!src) yield break;
+    float t = 0f;
+    src.volume = from;
+    while (t < duration)
+    {
+        t += Time.unscaledDeltaTime;
+        src.volume = Mathf.Lerp(from, to, Mathf.Clamp01(t / duration));
+        yield return null;
+    }
+    src.volume = to;
+    if (stopAtEnd && Mathf.Approximately(to, 0f)) src.Stop();
+}
+
+private void StartRepairLoopIfNeeded()
+{
+    if (!repairSource || !repairLoop || repairLoopPlaying) return;
+
+    repairSource.loop = true;
+    repairSource.clip = repairLoop;
+    repairSource.volume = 0f;
+    repairSource.Play();
+    StartCoroutine(FadeVolume(repairSource, 0f, repairVolume, repairFadeIn, false));
+    repairLoopPlaying = true;
+}
+
+private void StopRepairLoop(bool immediate = false)
+{
+    if (!repairSource || !repairLoopPlaying) return;
+
+    if (immediate || repairFadeOut <= 0f)
+    {
+        repairSource.Stop();
+        repairSource.volume = 0f;
+    }
+    else
+    {
+        StartCoroutine(FadeVolume(repairSource, repairSource.volume, 0f, repairFadeOut, true));
+    }
+    repairLoopPlaying = false;
+}
+
+
+
+}
+
+
+

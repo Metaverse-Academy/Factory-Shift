@@ -1,3 +1,4 @@
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -47,7 +48,25 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float idleDeadzone = 0.05f;
     [Tooltip("If true, we’ll rotate the model toward planar movement direction (useful for 3rd-person).")]
     [SerializeField] private bool rotateModelToMove = false;
-    [SerializeField] private Transform modelRoot; // optional, for model rotation only
+    [SerializeField] private Transform modelRoot;
+    [Header("Footsteps")]
+    [Tooltip("Randomly picked for each step.")]
+    [SerializeField] private AudioClip[] footstepClips;
+    [SerializeField, Range(0f, 1f)] private float footstepVolume = 0.5f;
+    [Tooltip("Audio source position for footsteps. If null, uses this transform.")]
+    [SerializeField] private Transform footstepOrigin;
+    [Tooltip("Base steps per second when moving at walkSpeed while standing.")]
+    [SerializeField] private float baseStepsPerSecond = 1.8f;
+    [Tooltip("Stride multiplier per stance (affects cadence).")]
+    [SerializeField] private float runStrideMult = 1.75f;
+    [SerializeField] private float crouchStrideMult = 0.7f;
+    [Tooltip("Minimum horizontal speed to start footsteps.")]
+    [SerializeField] private float footstepSpeedThreshold = 0.12f;
+
+    [Header("Landing SFX (optional)")]
+    [SerializeField] private AudioClip landingClip;
+    [SerializeField, Range(0f, 1f)] private float landingVolume = 0.6f;
+
 
     private Vector3 planarMoveDir;
     private Rigidbody rb;
@@ -57,25 +76,46 @@ public class PlayerMovement : MonoBehaviour
     private bool isSprinting;
     private bool isCrouching;
     private bool isCrawling;
+    private float stepAccumulator;
+    private bool wasGrounded;
+    public bool IsCrawling => isCrawling;
+    public bool IsCrouching => isCrouching;
+
 
     private float initialCapsuleRadius;
     private Vector3 initialCapsuleCenter;
+    
+  [Header("Colliders")]
+[SerializeField] private CapsuleCollider standCollider; // vertical
+[SerializeField] private CapsuleCollider crawlCollider; // horizontal child
+
+    public float LookaheadSettings { get; private set; }
+    public Vector3 Velocity { get; private set; }
 
     private enum Stance { Stand, Crouch, Crawl }
 
-    private void Awake()
-    {
-        rb = GetComponent<Rigidbody>();
-        capsule = GetComponent<CapsuleCollider>();
+private void Awake()
+{
+    rb = GetComponent<Rigidbody>();
 
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationY;
+    // if not assigned in inspector, assume the one on this GameObject is the standing collider
+    if (!standCollider) standCollider = GetComponent<CapsuleCollider>();
+    capsule = standCollider;                  // use vertical as our main capsule reference
 
-        initialCapsuleRadius = capsule.radius;
-        initialCapsuleCenter = capsule.center;
+    if (crawlCollider)
+        crawlCollider.enabled = false;        // disable prone collider at start
 
-        ApplyStance(Stance.Stand, force: true);
-    }
+    rb.interpolation = RigidbodyInterpolation.Interpolate;
+    rb.constraints = RigidbodyConstraints.FreezeRotationX |
+                     RigidbodyConstraints.FreezeRotationZ |
+                     RigidbodyConstraints.FreezeRotationY;
+
+    initialCapsuleRadius = capsule.radius;
+    initialCapsuleCenter = capsule.center;
+
+    ApplyStance(Stance.Stand, force: true);
+}
+
 
     private void FixedUpdate()
     {
@@ -88,6 +128,9 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = Physics.Raycast(rayOrigin, Vector3.down, groundDistanceCheck, groundLayer, QueryTriggerInteraction.Ignore);
 
         UpdateAnimator();
+        HandleFootsteps();
+        HandleLandingSfx();
+
     }
 
     private void HandleMovement()
@@ -118,57 +161,82 @@ public class PlayerMovement : MonoBehaviour
 
     // ---- Stance management ----
     private void ApplyStance(Stance stance, bool force = false)
+{
+    float targetHeight = standingHeight;
+    float camY = camY_Stand;
+
+    // ------------ choose target height & camera Y ------------
+    switch (stance)
     {
-        float targetHeight = standingHeight;
-        float camY = camY_Stand;
+        case Stance.Stand:
+            targetHeight = standingHeight;
+            camY = camY_Stand;
+            break;
 
-        switch (stance)
-        {
-            case Stance.Stand:
-                targetHeight = standingHeight;
-                camY = camY_Stand;
-                break;
-            case Stance.Crouch:
-                targetHeight = crouchHeight;
-                camY = camY_Crouch;
-                break;
-            case Stance.Crawl:
-                targetHeight = crawlHeight;
-                camY = camY_Crawl;
-                break;
-        }
+        case Stance.Crouch:
+            targetHeight = crouchHeight;
+            camY = camY_Crouch;
+            break;
 
-        if (!force)
-        {
-            float currentHeight = capsule.height;
-            bool gettingTaller = targetHeight > currentHeight + 0.001f;
-            if (gettingTaller && !HasSpaceFor(targetHeight))
-                return;
-        }
-
-        // Flags
-        isCrawling = (stance == Stance.Crawl);
-        isCrouching = (stance == Stance.Crouch);
-        if (isCrouching || isCrawling) isSprinting = false; // can’t sprint while low
-
-        // Collider resize keeping feet anchored
-        capsule.height = targetHeight;
-        capsule.center = new Vector3(initialCapsuleCenter.x, targetHeight * 0.5f, initialCapsuleCenter.z);
-
-        // Camera offset
-        if (cameraTransform != null)
-        {
-            Vector3 lp = cameraTransform.localPosition;
-            cameraTransform.localPosition = new Vector3(lp.x, camY, lp.z);
-        }
-
-        // Animator stance flags immediately
-        if (animator)
-        {
-            animator.SetBool("Crouch", isCrouching);
-            animator.SetBool("Crawl",  isCrawling);
-        }
+        case Stance.Crawl:
+            // we won’t use the vertical capsule for crawl,
+            // only change camera height here
+            camY = camY_Crawl;
+            break;
     }
+
+    // ------------ space check only when getting taller AND using vertical collider ------------
+    bool usingVertical = (stance == Stance.Stand || stance == Stance.Crouch);
+    if (usingVertical && !force)
+    {
+        float currentHeight = capsule.height;
+        bool gettingTaller = targetHeight > currentHeight + 0.001f;
+        if (gettingTaller && !HasSpaceFor(targetHeight))
+            return;
+    }
+
+    // ------------ flags ------------
+    isCrawling  = (stance == Stance.Crawl);
+    isCrouching = (stance == Stance.Crouch);
+    if (isCrouching || isCrawling) isSprinting = false;
+
+    // ------------ collider switching ------------
+    if (usingVertical)
+    {
+        // Stand / Crouch → vertical collider ON, crawl collider OFF
+        if (standCollider) standCollider.enabled = true;
+        if (crawlCollider) crawlCollider.enabled = false;
+
+        // resize vertical capsule (feet anchored using your old logic / center)
+        capsule.height = targetHeight;
+        capsule.center = new Vector3(
+            initialCapsuleCenter.x,
+            targetHeight * 0.5f,
+            initialCapsuleCenter.z
+        );
+    }
+    else
+    {
+        // Crawl → vertical collider OFF, prone collider ON
+        if (standCollider) standCollider.enabled = false;
+        if (crawlCollider) crawlCollider.enabled = true;
+    }
+
+    // ------------ camera offset ------------
+    if (cameraTransform != null)
+    {
+        Vector3 lp = cameraTransform.localPosition;
+        cameraTransform.localPosition = new Vector3(lp.x, camY, lp.z);
+    }
+
+    // ------------ animator flags ------------
+    if (animator)
+    {
+        animator.SetBool("Crouch", isCrouching);
+        animator.SetBool("Crawl",  isCrawling);
+    }
+}
+
 
     private bool HasSpaceFor(float targetHeight)
     {
@@ -187,6 +255,21 @@ public class PlayerMovement : MonoBehaviour
         bool blocked = Physics.CheckCapsule(feet, head, radius, maskNoSelf, QueryTriggerInteraction.Ignore);
         return !blocked;
     }
+    public void Teleport(Vector3 position, Quaternion rotation)
+{
+    rb.linearVelocity = Vector3.zero;      // or rb.linearVelocity if that’s what you use
+    rb.angularVelocity = Vector3.zero;
+
+    // yaw only
+    var yawOnly = Quaternion.Euler(0f, rotation.eulerAngles.y, 0f);
+    transform.SetPositionAndRotation(position, yawOnly);
+
+    Physics.SyncTransforms();
+    if (animator) animator.Update(0f);
+
+    // (remove those LookaheadSettings lines; they’re not used for rotation)
+}
+
 
     private void UpdateAnimator()
     {
@@ -296,8 +379,8 @@ public class PlayerMovement : MonoBehaviour
             }
             else if (ctx.canceled)
             {
-                if (HasSpaceFor(standingHeight))      ApplyStance(Stance.Stand);
-                else if (HasSpaceFor(crouchHeight))   ApplyStance(Stance.Crouch);
+                if (HasSpaceFor(standingHeight)) ApplyStance(Stance.Stand);
+                else if (HasSpaceFor(crouchHeight)) ApplyStance(Stance.Crouch);
             }
             return;
         }
@@ -307,8 +390,8 @@ public class PlayerMovement : MonoBehaviour
         {
             if (isCrawling)
             {
-                if (HasSpaceFor(standingHeight))      ApplyStance(Stance.Stand);
-                else if (HasSpaceFor(crouchHeight))   ApplyStance(Stance.Crouch);
+                if (HasSpaceFor(standingHeight)) ApplyStance(Stance.Stand);
+                else if (HasSpaceFor(crouchHeight)) ApplyStance(Stance.Crouch);
             }
             else
             {
@@ -317,5 +400,107 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public void ForceEnterCrawl()
+    {
+         var m = GetType().GetMethod("ApplyStance",
+        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+    // Stance.Crawl = 2
+        m?.Invoke(this, new object[] { (object)2, true });
+    }
+    private void HandleFootsteps()
+    {
+        if (footstepClips == null || footstepClips.Length == 0) return;
+
+        // Horizontal speed
+        Vector3 v = rb.linearVelocity;                 
+        float horizSpeed = new Vector3(v.x, 0f, v.z).magnitude;
+
+        // Only when grounded and actually moving
+        if (!isGrounded || horizSpeed < footstepSpeedThreshold  || isCrawling)
+        {
+            // Decay accumulator a bit so quick taps don't instantly fire
+            stepAccumulator = Mathf.Max(0f, stepAccumulator - Time.deltaTime);
+            return;
+        }
+
+        // Determine stride/cadence multiplier by stance
+          float strideMult = 1f;
+    if (isCrouching) strideMult = crouchStrideMult;
+    else if (isSprinting) strideMult = runStrideMult;
+
+    float relSpeed = Mathf.Clamp(horizSpeed / Mathf.Max(0.01f, walkSpeed), 0f, 3f);
+    float stepsPerSec = baseStepsPerSecond * relSpeed * strideMult;
+
+    float interval = (stepsPerSec <= 0.01f) ? 999f : (1f / stepsPerSec);
+    stepAccumulator += Time.deltaTime;
+
+    if (stepAccumulator >= interval)
+    {
+        stepAccumulator -= interval;
+        PlayFootstep();
+    }
+}
+
+    private void PlayFootstep()
+    {
+        var clip = footstepClips[Random.Range(0, footstepClips.Length)];
+        Vector3 pos = footstepOrigin ? footstepOrigin.position : transform.position;
+        AudioSource.PlayClipAtPoint(clip, pos, footstepVolume);
+    }
+    private void HandleLandingSfx()
+    {
+        if (landingClip == null) { wasGrounded = isGrounded; return; }
+
+        if (!wasGrounded && isGrounded)
+        {
+            Vector3 pos = footstepOrigin ? footstepOrigin.position : transform.position;
+            AudioSource.PlayClipAtPoint(landingClip, pos, landingVolume);
+            stepAccumulator = 0f;
+        }
+
+        wasGrounded = isGrounded;
+    }
+public void ForceStand(bool force = false)
+{
+    var m = GetType().GetMethod("ApplyStance",
+        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+    // Stance.Stand = 0
+    m?.Invoke(this, new object[] { (object)0, force });
+}
+
+    public void ForceCrouch(bool force = false)
+    {
+        var m = GetType().GetMethod("ApplyStance",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        // Stance.Crouch = 1
+        m?.Invoke(this, new object[] { (object)1, force });
+    }
+    public void ExitVentUpright(bool forceStand = false)
+{
+    // If you want to always stand regardless of headroom (level design guarantees it), set forceStand = true
+    var apply = GetType().GetMethod("ApplyStance",
+        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+    // enum values in your script: Stand=0, Crouch=1, Crawl=2
+    if (forceStand)
+    {
+        apply?.Invoke(this, new object[] { (object)0, /*force*/ true });
+        return;
+    }
+
+    // Respect headroom:
+    if (HasSpaceFor(standingHeight))
+        apply?.Invoke(this, new object[] { (object)0, /*force*/ true }); // Stand
+    else if (HasSpaceFor(crouchHeight))
+        apply?.Invoke(this, new object[] { (object)1, /*force*/ true }); // Crouch
+    else
+        apply?.Invoke(this, new object[] { (object)2, /*force*/ true }); // stay Crawl if truly no space
+}
+
+
+   // internal void Teleport(Vector3 position, Quaternion rotation)
+    //{
+       // throw new System.NotImplementedException();
+    //}
     #endregion
 }
