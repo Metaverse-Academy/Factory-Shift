@@ -25,6 +25,12 @@ public class VentPortalInteract : MonoBehaviour
     [Tooltip("Prevents an immediate re-trigger bounce at the destination.")]
     [SerializeField] private float reenterLockout = 0.25f;
 
+    [Header("Objectives (optional)")]
+    [Tooltip("Assign if this portal is the 'find the vents' objective.")]
+    [SerializeField] private ObjectiveManager objectiveManager;
+    [Tooltip("Tick this ONLY on the ladder/vent entry portal (not the exit).")]
+    [SerializeField] private bool isVentEntryObjective = false;
+
     // per-player lockout by instance id
     private static readonly Dictionary<int, float> lockoutUntil = new();
 
@@ -33,6 +39,8 @@ public class VentPortalInteract : MonoBehaviour
     private Transform playerRoot;
     private PlayerMovement playerMove;
     private Rigidbody playerRb;
+
+    private bool ventObjectiveReported = false;
 
     private void Reset()
     {
@@ -102,17 +110,25 @@ public class VentPortalInteract : MonoBehaviour
         // Lock out immediate re-trigger at the landing portal
         lockoutUntil[playerRoot.GetInstanceID()] = Time.time + reenterLockout;
 
+        // 🔹 Objective: player found/used the vent entry
+        if (isVentEntryObjective && !ventObjectiveReported)
+        {
+            ventObjectiveReported = true;
+            objectiveManager?.OnVentFound();
+        }
+
         // Hide prompt
         if (promptUI) promptUI.SetActive(false);
 
         // Clear state
         inRange = false;
-        playerRoot = null; playerMove = null; playerRb = null;
+        playerRoot = null; 
+        playerMove = null; 
+        playerRb = null;
     }
 
     private void TeleportPlayer()
     {
-
         // zero momentum to avoid sliding
         if (playerRb)
         {
@@ -124,30 +140,27 @@ public class VentPortalInteract : MonoBehaviour
             playerRb.angularVelocity = Vector3.zero;
         }
 
-        
         // yaw-only rotation from faceDirection or destination
         float yaw = (faceDirection ? faceDirection.rotation : destination.rotation).eulerAngles.y;
         Quaternion yawOnly = Quaternion.Euler(0f, yaw, 0f);
 
         playerRoot.SetPositionAndRotation(destination.position, yawOnly);
-        
         Physics.SyncTransforms();
 
-   // optional: force crawl only for ENTER portals
-if (forceCrawlAfterTeleport)
-{
-    playerMove?.ForceEnterCrawl();
-}
-else
-{
-    // EXIT portals: immediately try to go upright
-    playerMove?.ExitVentUpright(false); // pass true if you want to force stand regardless of headroom
-}
+        // optional: force crawl only for ENTER portals
+        if (forceCrawlAfterTeleport)
+        {
+            playerMove?.ForceEnterCrawl();
+        }
+        else
+        {
+            // EXIT portals: immediately try to go upright if you want
+            playerMove?.ExitVentUpright(false);
+        }
 
-// snap animator on new pose
-var anim = playerRoot.GetComponentInChildren<Animator>();
-if (anim) anim.Update(0f);
-
+        // snap animator on new pose
+        var anim = playerRoot.GetComponentInChildren<Animator>();
+        if (anim) anim.Update(0f);
     }
 
     private void OnDrawGizmos()
