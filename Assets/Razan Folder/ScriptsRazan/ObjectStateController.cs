@@ -11,35 +11,58 @@ public class ObjectStateController : MonoBehaviour
     public Material baseMaterial;            // المادة العادية
     public Material redMaterial;             // عندما يكون مخفي خلف الحائط
 
-    // داخلياً
+    [Header("Highlight State")]
+    [SerializeField] private bool highlightEnabled = false;  // NEW
+
     private MeshRenderer meshRenderer;
 
     void Start()
     {
         meshRenderer = GetComponent<MeshRenderer>();
 
-        // ضبط المادة الأساسية عند البداية
         if (baseMaterial != null)
             meshRenderer.material = baseMaterial;
     }
 
     void Update()
     {
+        if (!highlightEnabled)               // NEW → if not active, keep base and skip
+        {
+            if (baseMaterial != null)
+                meshRenderer.material = baseMaterial;
+            return;
+        }
+
         if (player == null) return;
 
-        // اتجاه ومسافة الجسم من اللاعب
         Vector3 dir = (transform.position - player.position).normalized;
         float rayDist = Vector3.Distance(player.position, transform.position);
 
-        // اكتشاف إذا كان هناك عائق بين اللاعب والجسم
-        bool occluded = Physics.Raycast(player.position, dir, out RaycastHit hit, rayDist + 0.01f, obstructionMask);
+        bool occluded = Physics.Raycast(
+            player.position,
+            dir,
+            out RaycastHit hit,
+            rayDist + 0.01f,
+            obstructionMask
+        );
 
-        // تغيير المادة فقط إذا الجسم خلف الحائط
         if (occluded && redMaterial != null)
         {
             meshRenderer.material = redMaterial;
         }
         else if (baseMaterial != null)
+        {
+            meshRenderer.material = baseMaterial;
+        }
+    }
+
+    // استدعِ هذه الدالة لتفعيل/إلغاء الهايلايت من السكربت الآخر
+    public void SetHighlightActive(bool active)
+    {
+        highlightEnabled = active;
+
+        // رجّع الماتيريال الأساسي فوراً إذا أطفأناه
+        if (!highlightEnabled && baseMaterial != null && meshRenderer != null)
         {
             meshRenderer.material = baseMaterial;
         }

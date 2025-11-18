@@ -109,6 +109,14 @@ public ObjectiveUI objectiveUI;
     [SerializeField] private GameObject[] enableOnComplete;
     [SerializeField] private GameObject[] disableOnComplete;
 
+    [Header("Vent Monster on Skill Fail")]
+    [SerializeField] private VentMonsterAttack ventMonster;
+    [SerializeField] private Transform playerTransform;
+    [SerializeField] private bool triggerMonsterOnFail = true;
+
+    private bool monsterAlreadyTriggered;
+
+
     // state
     private bool playerInRange;
     private bool holding;
@@ -457,11 +465,14 @@ private System.Collections.IEnumerator FlashFailRed()
 
 private void DoFailFeedback()
 {
-        
     StartCoroutine(FlashFailRed());
     PlayFailSfx();
     TriggerFailExplosion();
+
+    // Call vent monster here
+    TriggerVentMonster();
 }
+
 
     private void DoSuccessFeedback()
     {
@@ -506,6 +517,23 @@ private void TriggerFailExplosion()
         Destroy(ps.gameObject, killAfter);
     }
 }
+    private void TriggerVentMonster()
+    {
+        if (!triggerMonsterOnFail) return;
+        if (monsterAlreadyTriggered) return;
+
+        monsterAlreadyTriggered = true;
+
+        if (ventMonster != null && playerTransform != null)
+        {
+            ventMonster.StartVentAttack(playerTransform);
+        }
+        else
+        {
+            Debug.LogWarning("RepairableFixable: Vent monster or playerTransform not assigned.");
+        }
+    }
+
 
 
     private void PlaySkillAppearSfx()
@@ -559,6 +587,7 @@ private void StopRepairLoop(bool immediate = false)
     }
     repairLoopPlaying = false;
 }
+
 
 
 
