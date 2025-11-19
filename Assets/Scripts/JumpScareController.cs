@@ -19,12 +19,23 @@ public class JumpScareController : MonoBehaviour
     public float shakeDuration = 1.0f;
     public float shakeMagnitude = 0.4f;
 
+    [Header("Cameras")]
+    public Camera sceneCamera;   // normal scene camera
+    public Camera panelCamera;   // camera that looks at world-space lose panel
+
     private void Start()
     {
         Time.timeScale = 1f;
 
+        // Make sure lose panel is hidden at first
         if (losePanel != null)
             losePanel.SetActive(false);
+
+        // Camera setup: start with scene camera ON, panel camera OFF
+        if (sceneCamera != null)
+            sceneCamera.enabled = true;
+        if (panelCamera != null)
+            panelCamera.enabled = false;
 
         if (anim == null)
             anim = GetComponent<Animator>();
@@ -35,11 +46,11 @@ public class JumpScareController : MonoBehaviour
             anim.SetTrigger(jumpScareTriggerName);
         }
 
-        // start spotlight flicker
+        // flicker light
         if (flicker != null)
             flicker.StartFlicker();
 
-        // start camera shake
+        // camera shake
         if (cameraShake != null)
             cameraShake.StartShake(shakeDuration, shakeMagnitude);
 
@@ -48,16 +59,24 @@ public class JumpScareController : MonoBehaviour
 
     private IEnumerator JumpScareSequence()
     {
-        // wait for the jumpscare animation
+        // wait for jumpscare animation time
         yield return new WaitForSeconds(jumpScareDuration);
 
         // stop flicker
         if (flicker != null)
             flicker.StopFlicker();
 
+        // switch cameras ➜ now use the panel camera
+        if (sceneCamera != null)
+            sceneCamera.enabled = false;
+        if (panelCamera != null)
+            panelCamera.enabled = true;
+
+        // show lose panel
         if (losePanel != null)
             losePanel.SetActive(true);
 
+        // pause game
         Time.timeScale = 0f;
     }
 }
