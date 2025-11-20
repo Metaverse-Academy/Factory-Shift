@@ -9,6 +9,10 @@ public class DoorToHome : MonoBehaviour
     [Header("Player")]
     [SerializeField] private string playerTag = "Player";
 
+    [Header("Requirements")]
+    [Tooltip("Optional: door only works if this repair is completed.")]
+    [SerializeField] private RepairableFixable requiredRepair;   // 👈 NEW
+
     [Header("Input & UI")]
     [SerializeField] private InputActionReference interactAction; // bind to E
     [SerializeField] private GameObject promptUI;                 // "E to go home"
@@ -48,11 +52,24 @@ public class DoorToHome : MonoBehaviour
             interactAction.action.performed -= OnInteract;
     }
 
+    // 👇 Helper: can the player use this door now?
+    private bool CanUseDoor()
+    {
+        // if no requirement assigned, door is always usable
+        if (requiredRepair == null) return true;
+
+        // only usable if the repair is finished
+        return requiredRepair.IsRepaired;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag(playerTag)) return;
         inRange = true;
-        if (promptUI) promptUI.SetActive(true);
+
+        // show prompt ONLY if repaired
+        if (promptUI) 
+            promptUI.SetActive(CanUseDoor());
     }
 
     private void OnTriggerExit(Collider other)
@@ -62,9 +79,30 @@ public class DoorToHome : MonoBehaviour
         if (promptUI) promptUI.SetActive(false);
     }
 
+    private void Update()
+    {
+        // If player is standing at the door while repair finishes,
+        // update the prompt visibility.
+        if (!promptUI) return;
+
+        if (!inRange || !CanUseDoor())
+        {
+            if (promptUI.activeSelf)
+                promptUI.SetActive(false);
+        }
+        else
+        {
+            if (!promptUI.activeSelf)
+                promptUI.SetActive(true);
+        }
+    }
+
     private void OnInteract(InputAction.CallbackContext ctx)
     {
+        // must be in range, not already fading, AND repair finished
         if (!inRange || isFading) return;
+        if (!CanUseDoor()) return;
+
         StartCoroutine(FadeAndLoad());
     }
 

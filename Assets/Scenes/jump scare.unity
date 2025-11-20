@@ -56633,6 +56633,8 @@ MonoBehaviour:
   openDistance: 3
   moveSpeed: 2
   openOffset: {x: -14, y: 0, z: 0}
+  fadeSpeed: 2
+  maxVolumeDistance: 5
 --- !u!65 &1472421430
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -59455,6 +59457,8 @@ MonoBehaviour:
   openDistance: 3
   moveSpeed: 2
   openOffset: {x: 0, y: 0, z: -14}
+  fadeSpeed: 2
+  maxVolumeDistance: 5
 --- !u!65 &1519340766
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -76066,7 +76070,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3acb28920fdc58a48a68e114347565dd, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -69.36
+      value: -69.28
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3acb28920fdc58a48a68e114347565dd, type: 3}
       propertyPath: m_LocalRotation.w

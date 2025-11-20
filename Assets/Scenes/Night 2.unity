@@ -30506,6 +30506,8 @@ MonoBehaviour:
   openDistance: 3
   moveSpeed: 2
   openOffset: {x: 0, y: 0, z: -14}
+  fadeSpeed: 2
+  maxVolumeDistance: 5
 --- !u!65 &776004453
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -54612,6 +54614,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DoorToHome
   playerTag: Player
+  requiredRepair: {fileID: 839770845}
   interactAction: {fileID: 927316559073305242, guid: 20d7f63b1fa2f3948a553dc4c39d79a0, type: 3}
   promptUI: {fileID: 1494818618}
   targetSceneName: paycheck 2
@@ -56542,6 +56545,8 @@ MonoBehaviour:
   openDistance: 3
   moveSpeed: 2
   openOffset: {x: -14, y: 0, z: 0}
+  fadeSpeed: 2
+  maxVolumeDistance: 5
 --- !u!65 &1409970250
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -120,8 +120,8 @@ public ObjectiveUI objectiveUI;
     [SerializeField] private VentMonsterAttack ventMonster;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private bool triggerMonsterOnFail = true;
-
-    private bool monsterAlreadyTriggered;
+    public bool IsRepaired => repaired;
+        private bool monsterAlreadyTriggered;
 
 
     // state
