@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class TypewriterTMP : MonoBehaviour
 {
@@ -21,10 +22,40 @@ public class TypewriterTMP : MonoBehaviour
     [Header("Options")]
     public bool playOnStart = false;
 
+    [Header("After Typing")]
+    [Tooltip("الزر اللي يظهر بعد ما يخلص الكتابة")]
+    public GameObject continueButton;      // زر يكمل للمشهد التالي
+    [Tooltip("اسم المشهد اللي يفتح بعد شاشة Night 2")]
+    public string nextSceneName;           // اكتب اسم المشهد بالضبط مثل الـ Build Settings
+
+    [Header("Night 2 Fade")]
+    [Tooltip("CanvasGroup حق لوحة Night 2")]
+    public CanvasGroup night2CanvasGroup;
+    public float nightFadeIn = 1.0f;
+    public float nightHold = 1.0f;
+    public float nightFadeOut = 1.0f;
+
     Coroutine typingCoroutine;
+    bool typingFinished = false;
+    bool isNightSequenceRunning = false;
 
     void Start()
     {
+        
+    Cursor.lockState = CursorLockMode.None;
+    Cursor.visible = true;
+        // نخفي الزر في البداية
+        if (continueButton != null)
+            continueButton.SetActive(false);
+
+        // نتاكد ان لوحة Night 2 مخفية
+        if (night2CanvasGroup != null)
+        {
+            if (!night2CanvasGroup.gameObject.activeSelf)
+                night2CanvasGroup.gameObject.SetActive(true); // نخليها شغالة لكن شفافة
+            night2CanvasGroup.alpha = 0f;
+        }
+
         if (playOnStart)
             StartTyping();
     }
@@ -33,6 +64,12 @@ public class TypewriterTMP : MonoBehaviour
     {
         if (textComponent == null)
             return;
+
+        typingFinished = false;
+
+        // إخفاء الزر كل مرة نبدأ كتابة جديدة
+        if (continueButton != null)
+            continueButton.SetActive(false);
 
         // إيقاف أي عملية كتابة سابقة
         if (typingCoroutine != null)
@@ -72,6 +109,9 @@ public class TypewriterTMP : MonoBehaviour
             audioSource.Stop();
             audioSource.loop = false;
         }
+
+        typingFinished = true;
+        ShowContinueButton();
     }
 
     IEnumerator TypeText()
@@ -111,7 +151,70 @@ public class TypewriterTMP : MonoBehaviour
         }
 
         typingCoroutine = null;
+        typingFinished = true;
+
+        // ✅ لما يخلص الكتابة نظهر الزر
+        ShowContinueButton();
     }
+
+    void ShowContinueButton()
+    {
+        if (continueButton != null)
+            continueButton.SetActive(true);
+    }
+
+    // ⬇ هذه الدالة تستدعيها من الزر
+    public void OnContinueButtonPressed()
+    {
+        if (!typingFinished) return;
+        if (isNightSequenceRunning) return;
+
+        // نخفي الزر عشان ما يقدر يضغطه مرة ثانية
+        if (continueButton != null)
+            continueButton.SetActive(false);
+
+        StartCoroutine(Night2Sequence());
+    }
+
+   private IEnumerator Night2Sequence()
+{
+    isNightSequenceRunning = true;
+
+    Time.timeScale = 1f;
+
+    if (night2CanvasGroup != null)
+    {
+        night2CanvasGroup.gameObject.SetActive(true);
+
+        // Fade IN Night 2 (on the paycheck scene)
+        float t = 0f;
+        night2CanvasGroup.alpha = 0f;
+        while (t < nightFadeIn)
+        {
+            t += Time.deltaTime;
+            night2CanvasGroup.alpha = Mathf.Lerp(0f, 1f, t / nightFadeIn);
+            yield return null;
+        }
+        night2CanvasGroup.alpha = 1f;
+
+        // Hold Night 2 fully visible
+        yield return new WaitForSeconds(nightHold);
+
+        // ❗️IMPORTANT: we DO NOT fade out here anymore
+        // We go to the next scene while screen is fully covered by Night 2
+    }
+
+    if (!string.IsNullOrEmpty(nextSceneName))
+    {
+        SceneManager.LoadScene(nextSceneName);
+    }
+    else
+    {
+        Debug.LogError("TypewriterTMP: nextSceneName is empty!");
+    }
+
+    isNightSequenceRunning = false;
+}
 
     // استخراج الحرف الحقيقي بناءً على الفهرس (يتعامل مع Rich Text)
     char GetCharacterAtVisibleIndex(TextMeshProUGUI tmp, int index)

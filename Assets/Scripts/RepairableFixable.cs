@@ -72,6 +72,13 @@ private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°
 [SerializeField, Range(0f,1f)] private float repairCompleteVolume = 1f;
 [SerializeField] private float repairFadeIn = 0.12f;
 [SerializeField] private float repairFadeOut = 0.20f;
+[Header("Highlights")]
+[Tooltip("The vent / ladder highlight that should stop after repair.")]
+[SerializeField] private ObjectStateController ventHighlight;
+
+[Tooltip("The door highlight that should turn ON after repair.")]
+[SerializeField] private ObjectStateController doorHighlight;
+
 
 // If true, the loop only plays while the player is actively holding F.
 // If false (default), the loop starts the first time they begin repairing and
@@ -108,6 +115,14 @@ public ObjectiveUI objectiveUI;
     [Header("Finish")]
     [SerializeField] private GameObject[] enableOnComplete;
     [SerializeField] private GameObject[] disableOnComplete;
+
+    [Header("Vent Monster on Skill Fail")]
+    [SerializeField] private VentMonsterAttack ventMonster;
+    [SerializeField] private Transform playerTransform;
+    [SerializeField] private bool triggerMonsterOnFail = true;
+
+    private bool monsterAlreadyTriggered;
+
 
     // state
     private bool playerInRange;
@@ -367,20 +382,37 @@ wasHolding = holdingNow;
         }
     }
 
-    private void CompleteRepair()
+       private void CompleteRepair()
     {
         ShowPrompt(false);
         ShowHold(false);
         CancelSkillCheck();
         StopRepairLoop(false);
         PlayRepairCompleteSfx(); 
-        objectiveUI.CompleteAndShowNext("Go Home");
-        
 
-        foreach (var go in enableOnComplete) if (go) go.SetActive(true);
-        foreach (var go in disableOnComplete) if (go) go.SetActive(false);
+        // 👉 Update objective text
+        if (objectiveUI != null)
+        {
+            objectiveUI.CompleteAndShowNext("Go Home");
+        }
 
+        // 👉 Switch highlights:
+        // turn OFF vent highlight
+        if (ventHighlight != null)
+            ventHighlight.SetHighlightActive(false);
+
+        // turn ON door highlight
+        if (doorHighlight != null)
+            doorHighlight.SetHighlightActive(true);
+
+        // Enable / disable world objects as before
+        foreach (var go in enableOnComplete) 
+            if (go) go.SetActive(true);
+
+        foreach (var go in disableOnComplete) 
+            if (go) go.SetActive(false);
     }
+
 
     private System.Collections.IEnumerator FadeIn(CanvasGroup cg, float duration)
     {
@@ -457,11 +489,14 @@ private System.Collections.IEnumerator FlashFailRed()
 
 private void DoFailFeedback()
 {
-        
     StartCoroutine(FlashFailRed());
     PlayFailSfx();
     TriggerFailExplosion();
+
+    // Call vent monster here
+    TriggerVentMonster();
 }
+
 
     private void DoSuccessFeedback()
     {
@@ -506,6 +541,23 @@ private void TriggerFailExplosion()
         Destroy(ps.gameObject, killAfter);
     }
 }
+    private void TriggerVentMonster()
+    {
+        if (!triggerMonsterOnFail) return;
+        if (monsterAlreadyTriggered) return;
+
+        monsterAlreadyTriggered = true;
+
+        if (ventMonster != null && playerTransform != null)
+        {
+            ventMonster.StartVentAttack(playerTransform);
+        }
+        else
+        {
+            Debug.LogWarning("RepairableFixable: Vent monster or playerTransform not assigned.");
+        }
+    }
+
 
 
     private void PlaySkillAppearSfx()
@@ -559,6 +611,7 @@ private void StopRepairLoop(bool immediate = false)
     }
     repairLoopPlaying = false;
 }
+
 
 
 

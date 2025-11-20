@@ -14,8 +14,14 @@ public class NoteReader : MonoBehaviour
     [SerializeField] private GameObject promptUI;                 // "E to open note"
     [SerializeField] private GameObject noteUI;                   // panel with book/pages
 
+    [Header("Objectives (optional)")]
+    [SerializeField] private ObjectiveManager objectiveManager;
+    [Tooltip("Call OnNoteCollected once when player finishes reading (closes the note).")]
+    [SerializeField] private bool reportNoteObjectiveOnClose = true;
+
     private bool inRange;
     private bool noteOpen;
+    private bool noteObjectiveReported = false;
 
     private void Reset()
     {
@@ -26,7 +32,10 @@ public class NoteReader : MonoBehaviour
     private void OnEnable()
     {
         if (interactAction != null)
+        {
+            interactAction.action.Enable();
             interactAction.action.performed += OnInteract;
+        }
 
         if (promptUI) promptUI.SetActive(false);
         if (noteUI)   noteUI.SetActive(false);
@@ -35,7 +44,10 @@ public class NoteReader : MonoBehaviour
     private void OnDisable()
     {
         if (interactAction != null)
+        {
             interactAction.action.performed -= OnInteract;
+            interactAction.action.Disable();
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -61,8 +73,7 @@ public class NoteReader : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext ctx)
     {
-        // If not in range, ignore
-        if (!inRange) return;
+        if (!inRange) return;   // only if close to note
 
         if (!noteOpen)
         {
@@ -91,7 +102,7 @@ public class NoteReader : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        // if your "book script" needs a reset, you can call it here:
+        // if your "book script" needs a reset, call it here:
         // noteUI.GetComponent<YourBookScript>()?.Open();
     }
 
@@ -114,5 +125,12 @@ public class NoteReader : MonoBehaviour
         // show prompt again if still inside trigger
         if (inRange && promptUI)
             promptUI.SetActive(true);
+
+        // 🔹 Report objective ONCE when the note was properly read & closed
+        if (reportNoteObjectiveOnClose && !noteObjectiveReported)
+        {
+            noteObjectiveReported = true;
+            objectiveManager?.OnNoteCollected();
+        }
     }
 }
