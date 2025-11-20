@@ -59327,6 +59327,7 @@ GameObject:
   - component: {fileID: 1782498918}
   - component: {fileID: 1782498920}
   - component: {fileID: 1782498919}
+  - component: {fileID: 1782498921}
   m_Layer: 0
   m_Name: DoorRoot
   m_TagString: Untagged
@@ -59364,11 +59365,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DoorController
   player: {fileID: 1598047911}
   doorMesh: {fileID: 1938364130}
-  audioSource: {fileID: 2074121169}
+  audioSource: {fileID: 1782498921}
   doorSound: {fileID: 8300000, guid: cfccfa9f0d535433b956fd5b14551cb7, type: 3}
   openDistance: 3
   moveSpeed: 2
-  openOffset: {x: 0, y: 0, z: -14.2}
+  openOffset: {x: 0, y: 0, z: -5}
+  fadeSpeed: 2
+  maxVolumeDistance: 5
 --- !u!65 &1782498920
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -59390,6 +59393,103 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 2.24, z: 2.95}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!82 &1782498921
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1782498917}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1001 &1782649067
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -69303,7 +69403,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!82 &2074121169
 AudioSource:
   m_ObjectHideFlags: 0
@@ -70193,6 +70293,7 @@ GameObject:
   - component: {fileID: 2093504504}
   - component: {fileID: 2093504506}
   - component: {fileID: 2093504505}
+  - component: {fileID: 2093504507}
   m_Layer: 0
   m_Name: DoorRoot (1)
   m_TagString: Untagged
@@ -70230,11 +70331,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SimpleDoorController
   player: {fileID: 1598047911}
   doorMesh: {fileID: 789780387}
-  audioSource: {fileID: 2074121169}
+  audioSource: {fileID: 2093504507}
   doorSound: {fileID: 8300000, guid: cfccfa9f0d535433b956fd5b14551cb7, type: 3}
   openDistance: 3
   moveSpeed: 2
-  openOffset: {x: 14.2, y: 0, z: 0}
+  openOffset: {x: 5, y: 0, z: 0}
+  fadeSpeed: 2
+  maxVolumeDistance: 5
 --- !u!65 &2093504506
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -70256,6 +70359,103 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 2.24, z: 2.95}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!82 &2093504507
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093504503}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &2095167191
 GameObject:
   m_ObjectHideFlags: 0
