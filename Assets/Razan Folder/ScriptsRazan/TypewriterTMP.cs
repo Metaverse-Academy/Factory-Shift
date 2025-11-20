@@ -41,6 +41,9 @@ public class TypewriterTMP : MonoBehaviour
 
     void Start()
     {
+        
+    Cursor.lockState = CursorLockMode.None;
+    Cursor.visible = true;
         // نخفي الزر في البداية
         if (continueButton != null)
             continueButton.SetActive(false);

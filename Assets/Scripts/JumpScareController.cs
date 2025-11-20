@@ -73,6 +73,8 @@ public class JumpScareController : MonoBehaviour
             panelCamera.enabled = true;
 
         // show lose panel
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         if (losePanel != null)
             losePanel.SetActive(true);
 

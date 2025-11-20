@@ -5091,12 +5091,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObjectiveManager
   objectiveUI: {fileID: 1788401005}
-  noteText: Read the note
-  ventText: Look for the vent
-  exitText: Exit the building
-  noteHighlight: {fileID: 363231502}
-  ventHighlight: {fileID: 759989668}
-  exitHighlight: {fileID: 1342944324}
+  noteText: go to the vent
+  ventText: Exit the building
+  exitText: 
+  noteHighlight: {fileID: 759989668}
+  ventHighlight: {fileID: 1342944324}
+  exitHighlight: {fileID: 0}
 --- !u!4 &122602259
 Transform:
   m_ObjectHideFlags: 0
@@ -14548,62 +14548,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1801557314551938, guid: 4eba7747850446642b66b7de50916792, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 363231502}
-    - targetCorrespondingSourceObject: {fileID: 1801557314551938, guid: 4eba7747850446642b66b7de50916792, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 363231501}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4eba7747850446642b66b7de50916792, type: 3}
 --- !u!4 &363231499 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4492806641055378, guid: 4eba7747850446642b66b7de50916792, type: 3}
   m_PrefabInstance: {fileID: 363231498}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &363231500 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1801557314551938, guid: 4eba7747850446642b66b7de50916792, type: 3}
-  m_PrefabInstance: {fileID: 363231498}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &363231501
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 363231500}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 580d7c68e07b94e13b0b86902e2d4b54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NoteReader
-  playerTag: Player
-  disableWhileReading: []
-  interactAction: {fileID: 927316559073305242, guid: 20d7f63b1fa2f3948a553dc4c39d79a0, type: 3}
-  promptUI: {fileID: 2001023099}
-  noteUI: {fileID: 277048471}
-  objectiveManager: {fileID: 122602258}
-  reportNoteObjectiveOnClose: 1
---- !u!114 &363231502
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 363231500}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2556001c2e814f68ae2d7e2aaf9fee7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ObjectStateController
-  player: {fileID: 956202940}
-  obstructionMask:
-    serializedVersion: 2
-    m_Bits: 320
-  baseMaterial: {fileID: 2100000, guid: ca2f4fa1a1ebeca46ab1b9116e34ef99, type: 3}
-  redMaterial: {fileID: 2100000, guid: 98b2bda03ca594b918244c22f0cb9922, type: 2}
-  highlightEnabled: 0
 --- !u!1001 &368791600
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -54663,7 +54614,7 @@ MonoBehaviour:
   playerTag: Player
   interactAction: {fileID: 927316559073305242, guid: 20d7f63b1fa2f3948a553dc4c39d79a0, type: 3}
   promptUI: {fileID: 1494818618}
-  targetSceneName: paycheck
+  targetSceneName: paycheck 2
   fadeGroup: {fileID: 2052177677}
   fadeDuration: 1
 --- !u!65 &1342944326

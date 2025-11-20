@@ -12088,7 +12088,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NoteReader
   playerTag: Player
-  disableWhileReading: []
+  disableWhileReading:
+  - {fileID: 1299704012}
+  - {fileID: 225716527}
   interactAction: {fileID: 927316559073305242, guid: 20d7f63b1fa2f3948a553dc4c39d79a0, type: 3}
   promptUI: {fileID: 495318579}
   noteUI: {fileID: 2101937969}
@@ -39037,7 +39039,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ObjectiveManager
   objectiveUI: {fileID: 1151999361}
   noteText: Read the note
-  ventText: Look for the vent
+  ventText: 'go to the vent '
   exitText: Exit the building
   noteHighlight: {fileID: 339477224}
   ventHighlight: {fileID: 2118360735}
