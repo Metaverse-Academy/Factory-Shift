@@ -14,33 +14,27 @@ public class VentPortalInteract : MonoBehaviour
     [SerializeField] private Transform faceDirection;
 
     [Header("UI & Input")]
-    [Tooltip("Input Action (Button) bound to E (or your interact key)")]
     [SerializeField] private InputActionReference interactAction;   // E
-    [Tooltip("Shown when player is inside the trigger and allowed to interact")]
     [SerializeField] private GameObject promptUI;
 
     [Header("Behavior")]
-    [Tooltip("If true, call ForceEnterCrawl() after teleport (use for entering vents).")]
     [SerializeField] private bool forceCrawlAfterTeleport = true;
-    [Tooltip("Prevents an immediate re-trigger bounce at the destination.")]
     [SerializeField] private float reenterLockout = 0.25f;
 
-    [Header("Objectives (optional)")]
-    [Tooltip("Assign if this portal is the 'find the vents' objective.")]
-    [SerializeField] private ObjectiveManager objectiveManager;
-    [Tooltip("Tick this ONLY on the ladder/vent entry portal (not the exit).")]
-    [SerializeField] private bool isVentEntryObjective = false;
+    [Header("Objective Hook (optional)")]
+    [SerializeField] private MultiRepairObjective multiObjective;
+    [SerializeField] private Night1ObjectiveManager night1ObjectiveManager;
+   
 
-    // per-player lockout by instance id
+    public enum PortalMode { None, EnterVents, ExitVents }
+    [SerializeField] private PortalMode portalMode = PortalMode.None;
+
     private static readonly Dictionary<int, float> lockoutUntil = new();
 
-    // cached per-entrant
     private bool inRange;
     private Transform playerRoot;
     private PlayerMovement playerMove;
     private Rigidbody playerRb;
-
-    private bool ventObjectiveReported = false;
 
     private void Reset()
     {
@@ -69,18 +63,15 @@ public class VentPortalInteract : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // accept child colliders, check root tag
         var root = other.transform.root;
         if (!root.CompareTag(playerTag)) return;
 
-        // lockout: don’t immediately re-trigger the arrival portal
         int id = root.GetInstanceID();
         if (lockoutUntil.TryGetValue(id, out float until) && Time.time < until) return;
 
-        // cache refs
         playerRoot = root;
         playerMove = root.GetComponent<PlayerMovement>();
-        playerRb   = root.GetComponent<Rigidbody>();
+        playerRb = root.GetComponent<Rigidbody>();
         inRange = true;
 
         if (promptUI) promptUI.SetActive(true);
@@ -101,35 +92,40 @@ public class VentPortalInteract : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext ctx)
     {
-        if (!inRange) return;                  // must be inside trigger
+        if (!inRange) return;
         if (!playerRoot || !destination) return;
 
-        // Teleport now
         TeleportPlayer();
 
-        // Lock out immediate re-trigger at the landing portal
         lockoutUntil[playerRoot.GetInstanceID()] = Time.time + reenterLockout;
 
-        // 🔹 Objective: player found/used the vent entry
-        if (isVentEntryObjective && !ventObjectiveReported)
+        // ✅ Notify objective system
+        if (multiObjective != null)
         {
-            ventObjectiveReported = true;
-            objectiveManager?.OnVentFound();
+            if (portalMode == PortalMode.EnterVents)
+                multiObjective.OnEnterVents();
+            else if (portalMode == PortalMode.ExitVents)
+                multiObjective.OnExitVents();
         }
+           if (night1ObjectiveManager != null)
+        {
+            if (portalMode == PortalMode.EnterVents)
+                night1ObjectiveManager.OnEnterVents();
+            else if (portalMode == PortalMode.ExitVents)
+                night1ObjectiveManager.OnExitVents();
+        }
+    
 
-        // Hide prompt
         if (promptUI) promptUI.SetActive(false);
 
-        // Clear state
         inRange = false;
-        playerRoot = null; 
-        playerMove = null; 
+        playerRoot = null;
+        playerMove = null;
         playerRb = null;
     }
 
     private void TeleportPlayer()
     {
-        // zero momentum to avoid sliding
         if (playerRb)
         {
 #if UNITY_6000_0_OR_NEWER
@@ -140,25 +136,17 @@ public class VentPortalInteract : MonoBehaviour
             playerRb.angularVelocity = Vector3.zero;
         }
 
-        // yaw-only rotation from faceDirection or destination
         float yaw = (faceDirection ? faceDirection.rotation : destination.rotation).eulerAngles.y;
         Quaternion yawOnly = Quaternion.Euler(0f, yaw, 0f);
 
         playerRoot.SetPositionAndRotation(destination.position, yawOnly);
         Physics.SyncTransforms();
 
-        // optional: force crawl only for ENTER portals
         if (forceCrawlAfterTeleport)
-        {
             playerMove?.ForceEnterCrawl();
-        }
         else
-        {
-            // EXIT portals: immediately try to go upright if you want
             playerMove?.ExitVentUpright(false);
-        }
 
-        // snap animator on new pose
         var anim = playerRoot.GetComponentInChildren<Animator>();
         if (anim) anim.Update(0f);
     }

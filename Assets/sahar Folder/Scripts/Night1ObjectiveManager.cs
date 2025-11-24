@@ -1,21 +1,25 @@
 using UnityEngine;
 
-public class MultiRepairObjective : MonoBehaviour
+public class Night1ObjectiveManager : MonoBehaviour
 {
     [Header("Fans to repair")]
     [SerializeField] private RepairableFixable[] fans;
 
     [Header("Objective UI Texts")]
-    [TextArea] [SerializeField] private string goToLadderText = "Go to the vents ladder";
-    [TextArea] [SerializeField] private string repairFansText = "Repair both fans";
-    [TextArea] [SerializeField] private string exitVentsText  = "Exit the vents";
-    [TextArea] [SerializeField] private string goHomeText     = "Go Home";
+    [TextArea] [SerializeField] private string readNoteText    = "Read the note";
+    [TextArea] [SerializeField] private string goToLadderText  = "Go to the vents ladder";
+    [TextArea] [SerializeField] private string repairFansText  = "Repair both fans";
+    [TextArea] [SerializeField] private string exitVentsText   = "Exit the vents";
+    [TextArea] [SerializeField] private string goHomeText      = "Go Home";
 
     [Header("Objective UI")]
     [SerializeField] private ObjectiveUI objectiveUI;
 
     [Header("Highlights")]
-    [Tooltip("Highlight the ladder BEFORE entering vents.")]
+    [Tooltip("Highlight the NOTE first.")]
+    [SerializeField] private ObjectStateController noteHighlight;
+
+    [Tooltip("Highlight the ladder AFTER the note is read.")]
     [SerializeField] private ObjectStateController ladderHighlight;
 
     [Tooltip("Highlight these while repairing fans.")]
@@ -31,6 +35,7 @@ public class MultiRepairObjective : MonoBehaviour
 
     private enum Step
     {
+        ReadNote,
         GoToLadder,
         RepairFans,
         ExitVents,
@@ -43,19 +48,20 @@ public class MultiRepairObjective : MonoBehaviour
     private void Start()
     {
         repairedCount = 0;
-        currentStep = Step.GoToLadder;
+        currentStep = Step.ReadNote;
 
         // UI -> first objective
         if (objectiveUI != null)
-            objectiveUI.SetInitial(goToLadderText);
+            objectiveUI.SetInitial(readNoteText);
 
         // Highlights start state
-        SetHighlight(ladderHighlight, true);
+        SetHighlight(noteHighlight, true);
+        SetHighlight(ladderHighlight, false);
         SetFanHighlights(false);
         SetHighlight(ventExitHighlight, false);
         SetHighlight(mainDoorHighlight, false);
 
-        // subscribe to fans
+        // Subscribe to fans
         foreach (var fan in fans)
         {
             if (fan == null) continue;
@@ -65,7 +71,7 @@ public class MultiRepairObjective : MonoBehaviour
             fan.OnRepaired += HandleFanRepaired;
         }
 
-        // if already repaired in editor
+        // If already repaired in editor (rare, but safe)
         if (repairedCount >= fans.Length && fans.Length > 0)
             OnAllFansRepaired();
     }
@@ -79,9 +85,29 @@ public class MultiRepairObjective : MonoBehaviour
         }
     }
 
+    // =====================
+    // NOTE STEP
+    // =====================
+    public void OnNoteRead()
+    {
+        if (currentStep != Step.ReadNote) return;
+
+        currentStep = Step.GoToLadder;
+
+        if (objectiveUI != null)
+            objectiveUI.CompleteAndShowNext(goToLadderText);
+
+        // switch highlights:
+        SetHighlight(noteHighlight, false);
+        SetHighlight(ladderHighlight, true);
+    }
+
+    // =====================
+    // FAN STEP
+    // =====================
     private void HandleFanRepaired(RepairableFixable fan)
     {
-        if (currentStep != Step.RepairFans) return; // only count while repairing step
+        if (currentStep != Step.RepairFans) return;
 
         repairedCount++;
         Debug.Log($"Fans repaired: {repairedCount}/{fans.Length}");

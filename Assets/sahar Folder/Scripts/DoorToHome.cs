@@ -11,7 +11,8 @@ public class DoorToHome : MonoBehaviour
 
     [Header("Requirements")]
     [Tooltip("Optional: door only works if this repair is completed.")]
-    [SerializeField] private RepairableFixable requiredRepair;   // 👈 NEW
+    [SerializeField] private RepairableFixable[] requiredRepair;  
+
 
     [Header("Input & UI")]
     [SerializeField] private InputActionReference interactAction; // bind to E
@@ -59,7 +60,12 @@ public class DoorToHome : MonoBehaviour
         if (requiredRepair == null) return true;
 
         // only usable if the repair is finished
-        return requiredRepair.IsRepaired;
+        foreach (var repair in requiredRepair)
+        {
+            if (repair == null) continue;
+            if (!repair.IsRepaired) return false;
+        }
+        return true;
     }
 
     private void OnTriggerEnter(Collider other)

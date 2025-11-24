@@ -87,11 +87,7 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private float repairFadeIn = 0.12f;
     [SerializeField] private float repairFadeOut = 0.20f;
 
-    [Header("Highlights")]
-    [Tooltip("The vent / ladder highlight that should stop after repair.")]
-    [SerializeField] private ObjectStateController ventHighlight;
-    [Tooltip("The door highlight that should turn ON after repair.")]
-    [SerializeField] private ObjectStateController doorHighlight;
+   
 
     [SerializeField] private bool loopOnlyWhileHolding = false;
 
@@ -426,13 +422,6 @@ public class RepairableFixable : MonoBehaviour
         {
             objectiveUI.CompleteAndShowNext("Go Home");
         }
-
-        // Switch highlights
-        if (ventHighlight != null)
-            ventHighlight.SetHighlightActive(false);
-
-        if (doorHighlight != null)
-            doorHighlight.SetHighlightActive(true);
 
         foreach (var go in enableOnComplete)
             if (go) go.SetActive(true);
