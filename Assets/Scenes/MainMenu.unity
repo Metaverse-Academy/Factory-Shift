@@ -355,7 +355,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 298514716}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1495786682}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!114 &298514716
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2680,6 +2692,7 @@ GameObject:
   - component: {fileID: 1495786685}
   - component: {fileID: 1495786684}
   - component: {fileID: 1495786683}
+  - component: {fileID: 1495786687}
   m_Layer: 5
   m_Name: CanvasCredits
   m_TagString: Untagged
@@ -2737,14 +2750,14 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 1337948715}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -2771,6 +2784,18 @@ RectTransform:
   m_AnchoredPosition: {x: 131.7, y: 73.391}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1495786687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1495786682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f72115247ef443b7ab966d6c339305c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CloseCreditsOnClick
 --- !u!1 &1520201037
 GameObject:
   m_ObjectHideFlags: 0
@@ -8298,7 +8323,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -17, y: -189}
+  m_AnchoredPosition: {x: -17, y: -2159}
   m_SizeDelta: {x: 880.0422, y: 50}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &2044532327
@@ -8314,6 +8339,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CreditsScroller
   speed: 5
+  startPosition: {x: 0, y: 0, z: 0}
+  endY: 1000
+  creditsCanvas: {fileID: 1495786682}
 --- !u!114 &2044532328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8334,15 +8362,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Credits
-
-    *
-
-    *
-
-    *
-
-    *'
+  m_text: "Factory Shift\nCredits\n\u2014\u2014\u2014\u2014\u2014\u2014\n\nDeveloped
+    & Programming By\n*\n\nGame Design\n*\n\n3D Modeling\n*\n\nAnimation\n*\n\nUI/UX
+    Design\n*\n\nSound & Music Design\n*\n\nStory & Writing\n*\n\nTools Used\nUnity
+    Engine\nProcreate\n\nThank You For Playing!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
