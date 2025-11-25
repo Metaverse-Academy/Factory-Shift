@@ -80,6 +80,8 @@ public class PlayerMovement : MonoBehaviour
     private bool wasGrounded;
     public bool IsCrawling => isCrawling;
     public bool IsCrouching => isCrouching;
+    private bool inVent;       
+    public bool InVent => inVent; 
 
 
     private float initialCapsuleRadius;
@@ -335,70 +337,78 @@ private void Awake()
         else if (ctx.canceled) isSprinting = false;
     }
 
-    public void OnCrouch(InputAction.CallbackContext ctx)
-    {
-        if (useToggleCrouch)
-        {
-            if (ctx.performed)
-            {
-                if (isCrawling)
-                {
-                    ApplyStance(Stance.Crouch);
-                }
-                else if (isCrouching)
-                {
-                    ApplyStance(Stance.Stand);
-                }
-                else
-                {
-                    ApplyStance(Stance.Crouch);
-                }
-            }
-        }
-        else
-        {
-            if (ctx.performed)
-            {
-                if (!isCrawling) ApplyStance(Stance.Crouch);
-            }
-            else if (ctx.canceled)
-            {
-                ApplyStance(Stance.Stand);
-            }
-        }
-    }
+   public void OnCrouch(InputAction.CallbackContext ctx)
+{
+    // 🚫 No crouch in vents
+    if (inVent) return;
 
-    public void OnCrawl(InputAction.CallbackContext ctx)
+    if (useToggleCrouch)
     {
-        if (!useToggleCrawl)
-        {
-            // hold-to-crawl
-            if (ctx.performed)
-            {
-                ApplyStance(Stance.Crawl);
-            }
-            else if (ctx.canceled)
-            {
-                if (HasSpaceFor(standingHeight)) ApplyStance(Stance.Stand);
-                else if (HasSpaceFor(crouchHeight)) ApplyStance(Stance.Crouch);
-            }
-            return;
-        }
-
-        // toggle behavior
         if (ctx.performed)
         {
             if (isCrawling)
             {
-                if (HasSpaceFor(standingHeight)) ApplyStance(Stance.Stand);
-                else if (HasSpaceFor(crouchHeight)) ApplyStance(Stance.Crouch);
+                ApplyStance(Stance.Crouch);
+            }
+            else if (isCrouching)
+            {
+                ApplyStance(Stance.Stand);
             }
             else
             {
-                ApplyStance(Stance.Crawl);
+                ApplyStance(Stance.Crouch);
             }
         }
     }
+    else
+    {
+        if (ctx.performed)
+        {
+            if (!isCrawling) ApplyStance(Stance.Crouch);
+        }
+        else if (ctx.canceled)
+        {
+            ApplyStance(Stance.Stand);
+        }
+    }
+}
+
+
+    public void OnCrawl(InputAction.CallbackContext ctx)
+{
+    // 🚫 No manual crawl toggle in vents – player stays in crawl
+    if (inVent) return;
+
+    if (!useToggleCrawl)
+    {
+        // hold-to-crawl
+        if (ctx.performed)
+        {
+            ApplyStance(Stance.Crawl);
+        }
+        else if (ctx.canceled)
+        {
+            if (HasSpaceFor(standingHeight)) ApplyStance(Stance.Stand);
+            else if (HasSpaceFor(crouchHeight)) ApplyStance(Stance.Crouch);
+        }
+        return;
+    }
+
+    // toggle behavior
+    if (ctx.performed)
+    {
+        if (isCrawling)
+        {
+            if (HasSpaceFor(standingHeight)) ApplyStance(Stance.Stand);
+            else if (HasSpaceFor(crouchHeight)) ApplyStance(Stance.Crouch);
+        }
+        else
+        {
+            ApplyStance(Stance.Crawl);
+        }
+    }
+}
+
 
     public void ForceEnterCrawl()
     {
@@ -495,6 +505,23 @@ public void ForceStand(bool force = false)
         apply?.Invoke(this, new object[] { (object)1, /*force*/ true }); // Crouch
     else
         apply?.Invoke(this, new object[] { (object)2, /*force*/ true }); // stay Crawl if truly no space
+}
+public void SetInVent(bool value)
+{
+    inVent = value;
+
+    if (inVent)
+    {
+        // When entering vents: force crawl & stop sprint
+        ApplyStance(Stance.Crawl, true);
+        isSprinting = false;
+    }
+    else
+    {
+        // When leaving vents you can choose what to do.
+        // Right now we do nothing here because ExitVentUpright()
+        // already sets the stance correctly from the portal script.
+    }
 }
 
 

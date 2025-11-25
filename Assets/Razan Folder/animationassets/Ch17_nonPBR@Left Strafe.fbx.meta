@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: d41ec4af8f83e4ab085c36f3aa9bb009
+guid: dc42b6adfe1919a4da41f5d939721356
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,7 +31,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: mixamo.com
+      name: Left Strafe
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0

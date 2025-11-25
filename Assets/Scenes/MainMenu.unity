@@ -8363,9 +8363,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "Factory Shift\nCredits\n\u2014\u2014\u2014\u2014\u2014\u2014\n\nDeveloped
-    & Programming By\n*\n\nGame Design\n*\n\n3D Modeling\n*\n\nAnimation\n*\n\nUI/UX
-    Design\n*\n\nSound & Music Design\n*\n\nStory & Writing\n*\n\nTools Used\nUnity
-    Engine\nProcreate\n\nThank You For Playing!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+    & Programming By\nSahar,Razan,Lina\n\nGame Design\nSahar,Razan,Lina\n\nAnimation\nSahar,Razan,Lina\n\nUI/UX
+    Design\nSahar,Razan\n\nSound & Music Design\nSahar,Razan,Lina\n\nStory & Writing\nSahar,Razan\n\nTools
+    Used\nUnity Engine\nProcreate\n\nThank You For Playing!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

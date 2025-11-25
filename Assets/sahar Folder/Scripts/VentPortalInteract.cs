@@ -135,6 +135,7 @@ public class VentPortalInteract : MonoBehaviour
 #endif
             playerRb.angularVelocity = Vector3.zero;
         }
+        
 
         float yaw = (faceDirection ? faceDirection.rotation : destination.rotation).eulerAngles.y;
         Quaternion yawOnly = Quaternion.Euler(0f, yaw, 0f);
@@ -146,6 +147,19 @@ public class VentPortalInteract : MonoBehaviour
             playerMove?.ForceEnterCrawl();
         else
             playerMove?.ExitVentUpright(false);
+            // ENTER vent portal (forceCrawlAfterTeleport = true)
+if (forceCrawlAfterTeleport)
+{
+    playerMove?.ForceEnterCrawl();
+    playerMove?.SetInVent(true);   // 🔸 mark as in vents
+}
+else
+{
+    // EXIT vent portal
+    playerMove?.ExitVentUpright(false);
+    playerMove?.SetInVent(false);  // 🔹 back to normal
+}
+
 
         var anim = playerRoot.GetComponentInChildren<Animator>();
         if (anim) anim.Update(0f);

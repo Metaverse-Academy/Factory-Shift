@@ -37914,7 +37914,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraRotate
   cameraTransform: {fileID: 1639930198}
   smoothFollow: 1
-  turnSpeed: 10
+  turnSpeed: 3
   yawOffset: 0
 --- !u!114 &1221315033
 MonoBehaviour:
@@ -37944,7 +37944,6 @@ MonoBehaviour:
   crouchHeight: 1
   useToggleCrawl: 1
   crawlSpeed: 2.5
-  crawlHeight: 0.75
   stanceBlockMask:
     serializedVersion: 2
     m_Bits: 128
@@ -40312,6 +40311,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DoorToHome
   playerTag: Player
+  requiredRepair: []
   interactAction: {fileID: 927316559073305242, guid: 20d7f63b1fa2f3948a553dc4c39d79a0, type: 3}
   promptUI: {fileID: 978820339}
   targetSceneName: test

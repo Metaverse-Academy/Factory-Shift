@@ -16581,7 +16581,7 @@ MonoBehaviour:
   disableOnComplete: []
   ventMonster: {fileID: 580020634}
   playerTransform: {fileID: 956202940}
-  triggerMonsterOnFail: 0
+  triggerMonsterOnFail: 1
   fanAnimator: {fileID: 198054594}
   startFanTrigger: StartFan
   fanAudioSource: {fileID: 104942678}
@@ -71716,6 +71716,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8365552201738294511, guid: 93070416ae5f0a141a782fddc1b3ce4a, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -7145820420558185357, guid: 93070416ae5f0a141a782fddc1b3ce4a, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -71723,6 +71727,10 @@ PrefabInstance:
     - target: {fileID: -5898696405810556106, guid: 93070416ae5f0a141a782fddc1b3ce4a, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5258791721928388097, guid: 93070416ae5f0a141a782fddc1b3ce4a, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2874631316490838666, guid: 93070416ae5f0a141a782fddc1b3ce4a, type: 3}
       propertyPath: m_IsActive
@@ -72041,7 +72049,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraRotate
   cameraTransform: {fileID: 37775691}
   smoothFollow: 1
-  turnSpeed: 10
+  turnSpeed: 5
   yawOffset: 0
 --- !u!54 &956202947
 Rigidbody:
@@ -154762,7 +154770,7 @@ MonoBehaviour:
   disableOnComplete: []
   ventMonster: {fileID: 1085815693}
   playerTransform: {fileID: 956202940}
-  triggerMonsterOnFail: 0
+  triggerMonsterOnFail: 1
   fanAnimator: {fileID: 2141228969}
   startFanTrigger: StartFan
   fanAudioSource: {fileID: 1858290527}
