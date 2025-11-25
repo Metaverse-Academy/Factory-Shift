@@ -12,7 +12,7 @@ public class RepairableFixable : MonoBehaviour
 
     [Header("Input (New Input System)")]
     [Tooltip("Bind to F (Hold) in your actions asset.")]
-    [SerializeField] private InputActionReference holdFixAction; // E
+    [SerializeField] private InputActionReference holdFixAction; 
     [Tooltip("Key to hit during skill-check (e.g., Space).")]
     [SerializeField] private Key skillCheckKey = Key.Space;
 
@@ -22,9 +22,9 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private string promptText = "HOLD E TO FIX";
 
     [Header("UI: Hold Progress")]
-    [SerializeField] private CanvasGroup holdGroup;   // show while holding F
+    [SerializeField] private CanvasGroup holdGroup;   // show while holding E
     [Tooltip("Radial Image (Fill Method = Radial 360).")]
-    [SerializeField] private Image holdFill;          // fillAmount 0..1
+    [SerializeField] private Image holdFill;
 
     [Header("Repair Settings")]
     [SerializeField] private float totalRepairSeconds = 6.0f;
@@ -63,8 +63,6 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private Vector2 randomOffsetMax = new Vector2( 250f,  140f);
 
     private Vector2 skillRootRestPos;
-
-
     private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°=up
 
     // ---- Skill-check feedback ----
@@ -86,19 +84,14 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField, Range(0f,1f)] private float repairCompleteVolume = 1f;
     [SerializeField] private float repairFadeIn = 0.12f;
     [SerializeField] private float repairFadeOut = 0.20f;
-
-   
-
     [SerializeField] private bool loopOnlyWhileHolding = false;
 
     // internal
     private bool repairLoopPlaying;
     private bool wasHolding;
-
-    public ObjectiveUI objectiveUI;
+    
 
     [SerializeField] private ParticleSystem failExplosionPrefab;
-    [SerializeField] private ParticleSystem failExplosionInScene;
     [Tooltip("Where to place the explosion. If null, uses this object's position.")]
     [SerializeField] private Transform explosionSpawnPoint;
     [Tooltip("If using a prefab, parent the spawned VFX to this object (so it follows).")]
@@ -121,23 +114,18 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private VentMonsterAttack ventMonster;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private bool triggerMonsterOnFail = true;
-[Header("Fan Animation (optional)")]
-[SerializeField] private Animator fanAnimator;          // drag the fan's Animator here
-[SerializeField] private string startFanTrigger = "StartFan";
-[Header("Fan Start SFX (optional)")]
-[SerializeField] private AudioSource fanAudioSource;   // can be on fan object or this object
-[SerializeField] private AudioClip fanStartClip;
-[SerializeField, Range(0f, 1f)] private float fanStartVolume = 1f;
-
-
-
+    [Header("Fan Animation (optional)")]
+    [SerializeField] private Animator fanAnimator;          // drag the fan's Animator here
+    [SerializeField] private string startFanTrigger = "StartFan";
+    [Header("Fan Start SFX (optional)")]
+    [SerializeField] private AudioSource fanAudioSource;   // can be on fan object or this object
+    [SerializeField] private AudioClip fanStartClip;
+    [SerializeField, Range(0f, 1f)] private float fanStartVolume = 1f;
     public bool IsRepaired => repaired;
 
     // ✅ NEW: event for multi-repair objective manager
     public event Action<RepairableFixable> OnRepaired;
-
     private bool monsterAlreadyTriggered;
-
     // state
     private bool playerInRange;
     private bool holding;
@@ -417,12 +405,6 @@ public class RepairableFixable : MonoBehaviour
         StopRepairLoop(false);
         PlayRepairCompleteSfx();
 
-        // Update objective text (keep it if you want per-fan UI)
-        if (objectiveUI != null)
-        {
-            objectiveUI.CompleteAndShowNext("Go Home");
-        }
-
         foreach (var go in enableOnComplete)
             if (go) go.SetActive(true);
 
@@ -545,14 +527,7 @@ if (fanStartClip != null)
 
     private void TriggerFailExplosion()
     {
-        if (failExplosionInScene != null)
-        {
-            var pos = explosionSpawnPoint ? explosionSpawnPoint.position : transform.position;
-            failExplosionInScene.transform.position = pos;
-            if (explosionSpawnPoint) failExplosionInScene.transform.rotation = explosionSpawnPoint.rotation;
-            failExplosionInScene.Play(true);
-            return;
-        }
+        
 
         if (failExplosionPrefab != null)
         {

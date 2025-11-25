@@ -16567,9 +16567,7 @@ MonoBehaviour:
   repairFadeIn: 0.12
   repairFadeOut: 0.2
   loopOnlyWhileHolding: 0
-  objectiveUI: {fileID: 0}
   failExplosionPrefab: {fileID: 1831759793}
-  failExplosionInScene: {fileID: 0}
   explosionSpawnPoint: {fileID: 1776009405}
   attachExplosionToThis: 1
   failFlashGroup: {fileID: 2043065159}
@@ -46963,7 +46961,7 @@ MonoBehaviour:
   forceCrawlAfterTeleport: 1
   reenterLockout: 0.25
   multiObjective: {fileID: 3173124}
-  night1Objective: {fileID: 0}
+  night1ObjectiveManager: {fileID: 0}
   portalMode: 1
 --- !u!65 &617461348
 BoxCollider:
@@ -73074,7 +73072,7 @@ Transform:
   m_GameObject: {fileID: 977149356}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5, y: 0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: -86.17, y: 28.81, z: -70.83}
+  m_LocalPosition: {x: -86.17, y: 28.87, z: -70.83}
   m_LocalScale: {x: 1.3978442, y: 0.40845907, z: 1.4404716}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -90905,9 +90903,7 @@ MonoBehaviour:
   repairFadeIn: 0.12
   repairFadeOut: 0.2
   loopOnlyWhileHolding: 0
-  objectiveUI: {fileID: 0}
   failExplosionPrefab: {fileID: 0}
-  failExplosionInScene: {fileID: 0}
   explosionSpawnPoint: {fileID: 1944474542}
   attachExplosionToThis: 1
   failFlashGroup: {fileID: 0}
@@ -104021,7 +104017,7 @@ MonoBehaviour:
   forceCrawlAfterTeleport: 0
   reenterLockout: 0.25
   multiObjective: {fileID: 3173124}
-  night1Objective: {fileID: 0}
+  night1ObjectiveManager: {fileID: 0}
   portalMode: 2
 --- !u!65 &1414884504
 BoxCollider:
@@ -154752,9 +154748,7 @@ MonoBehaviour:
   repairFadeIn: 0.12
   repairFadeOut: 0.2
   loopOnlyWhileHolding: 0
-  objectiveUI: {fileID: 0}
   failExplosionPrefab: {fileID: 1831759793}
-  failExplosionInScene: {fileID: 0}
   explosionSpawnPoint: {fileID: 533287563}
   attachExplosionToThis: 1
   failFlashGroup: {fileID: 2043065159}
