@@ -14,14 +14,10 @@ public class NoteReader : MonoBehaviour
     [SerializeField] private GameObject promptUI;                 // "E to open note"
     [SerializeField] private GameObject noteUI;                   // panel with book/pages
 
-    // [Header("Objectives (optional)")]
-    // [SerializeField] private ObjectiveManager objectiveManager;
+    [Header("Objectives (optional)")]
+    [SerializeField] private ObjectiveManager objectiveManager;
     [Tooltip("Call OnNoteCollected once when player finishes reading (closes the note).")]
     [SerializeField] private bool reportNoteObjectiveOnClose = true;
-    [Header("Objectives (optional)")]
-[SerializeField] private Night1ObjectiveManager night1Objectives;
-private bool reportedNote = false;
-
 
     private bool inRange;
     private bool noteOpen;
@@ -89,27 +85,26 @@ private bool reportedNote = false;
         }
     }
 
-   private void OpenNote()
-{
-    noteOpen = true;
-
-    if (promptUI) promptUI.SetActive(false);
-    if (noteUI) noteUI.SetActive(true);
-
-    foreach (var comp in disableWhileReading)
-        if (comp) comp.enabled = false;
-
-    Cursor.lockState = CursorLockMode.None;
-    Cursor.visible = true;
-
-    // ✅ report objective once
-    if (!reportedNote)
+    private void OpenNote()
     {
-        reportedNote = true;
-        night1Objectives?.OnNoteRead();
-    }
-}
+        noteOpen = true;
 
+        if (promptUI) promptUI.SetActive(false);
+        if (noteUI)   noteUI.SetActive(true);
+
+        // disable movement / looking scripts
+        foreach (var comp in disableWhileReading)
+        {
+            if (comp) comp.enabled = false;
+        }
+
+        // unlock mouse so player can click / flip pages
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // if your "book script" needs a reset, call it here:
+        // noteUI.GetComponent<YourBookScript>()?.Open();
+    }
 
     private void CloseNote()
     {
@@ -135,7 +130,7 @@ private bool reportedNote = false;
         if (reportNoteObjectiveOnClose && !noteObjectiveReported)
         {
             noteObjectiveReported = true;
-            night1Objectives?.OnNoteRead();
+            objectiveManager?.OnNoteCollected();
         }
     }
 }

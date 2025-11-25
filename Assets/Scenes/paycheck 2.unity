@@ -333,8 +333,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: NIGHT 2
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
-  m_sharedMaterial: {fileID: 2140474, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1092,8 +1092,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TypewriterTMP
   textComponent: {fileID: 859011035}
-  fullText: "Fan repair (x2):                        500.00$\nSpare parts(x2):                        
-    120.00$\n\n\n\n\n                                          Total: 620.00$"
+  fullText: "Fan repair (x1):                        250.00$\nSpare parts(x1):                        
+    60.00$\n\n\n\n\n                                          Total: 310.00$"
   charDelay: 0.04
   punctuationDelay: 0.18
   audioSource: {fileID: 382600614}

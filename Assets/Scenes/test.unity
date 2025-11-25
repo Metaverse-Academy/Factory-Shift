@@ -17354,8 +17354,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: NIGHT 1
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
-  m_sharedMaterial: {fileID: 2140474, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -20416,6 +20416,7 @@ GameObject:
   - component: {fileID: 713977813}
   - component: {fileID: 713977816}
   - component: {fileID: 713977815}
+  - component: {fileID: 713977814}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -20442,6 +20443,22 @@ RectTransform:
   m_AnchoredPosition: {x: -26.27002, y: -439.26}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &713977814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 713977812}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33cd727b2eaac4c4ead1ae4be136158f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogue
+  textComponent: {fileID: 0}
+  lines:
+  - Hello there
+  textSpeed: 3.23
 --- !u!114 &713977815
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21488,6 +21505,7 @@ GameObject:
   - component: {fileID: 752541530}
   - component: {fileID: 752541533}
   - component: {fileID: 752541532}
+  - component: {fileID: 752541531}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -21515,6 +21533,22 @@ RectTransform:
   m_AnchoredPosition: {x: -26.27002, y: -462.32}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &752541531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752541529}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33cd727b2eaac4c4ead1ae4be136158f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogue
+  textComponent: {fileID: 1117257156}
+  lines:
+  - Hello there
+  textSpeed: 3.23
 --- !u!114 &752541532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41119,7 +41153,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1309674904}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
@@ -51774,6 +51808,7 @@ GameObject:
   - component: {fileID: 1571892691}
   - component: {fileID: 1571892693}
   - component: {fileID: 1571892692}
+  - component: {fileID: 1571892694}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -51839,6 +51874,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1571892690}
   m_CullTransparentMesh: 1
+--- !u!114 &1571892694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1571892690}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33cd727b2eaac4c4ead1ae4be136158f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogue
+  textComponent: {fileID: 1323397784}
+  lines:
+  - Hello there
+  textSpeed: 3.23
 --- !u!1001 &1573306919
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -56758,6 +56809,92 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d5043bca273c5df448b209a3abebd5ca, type: 3}
+--- !u!1 &1718270161
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1718270164}
+  - component: {fileID: 1718270163}
+  - component: {fileID: 1718270165}
+  - component: {fileID: 1718270162}
+  m_Layer: 0
+  m_Name: return
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1718270162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1718270161}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8aa1ee6018d6c5f41ae58e5fe9145198, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CutsceneAutoReturn
+  returnSceneOverride: gameplay
+  outroGroup: {fileID: 0}
+  outroText: {fileID: 0}
+  message: NIGHT 1
+  fadeIn: 0.6
+  hold: 2.54
+  fadeOut: 3.49
+  useUnscaledTime: 1
+--- !u!320 &1718270163
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1718270161}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 11400000, guid: 57f5502fea9c0874fb3804894c567b24, type: 2}
+  m_InitialState: 1
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 1
+  m_InitialTime: 0
+  m_SceneBindings: []
+  m_ExposedReferences:
+    m_References: []
+--- !u!4 &1718270164
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1718270161}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.21282, y: -0.17351, z: 0.78653}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1718270165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1718270161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f74681e9eb551cf49a1cfdd83f6fb9ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CutsceneAutoGoToScene
+  targetSceneName: gameplay
+  fadeOut: 0.6
+  fadeIn: 0.6
 --- !u!114 &1719288018 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2420040683944633841, guid: d5043bca273c5df448b209a3abebd5ca, type: 3}
@@ -59609,6 +59746,7 @@ GameObject:
   - component: {fileID: 1804960772}
   - component: {fileID: 1804960775}
   - component: {fileID: 1804960774}
+  - component: {fileID: 1804960773}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -59635,6 +59773,22 @@ RectTransform:
   m_AnchoredPosition: {x: -26.27002, y: -439.26}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1804960773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1804960771}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33cd727b2eaac4c4ead1ae4be136158f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogue
+  textComponent: {fileID: 0}
+  lines:
+  - Hello there
+  textSpeed: 3.23
 --- !u!114 &1804960774
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61932,6 +62086,7 @@ GameObject:
   - component: {fileID: 1904193212}
   - component: {fileID: 1904193215}
   - component: {fileID: 1904193214}
+  - component: {fileID: 1904193213}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -61958,6 +62113,22 @@ RectTransform:
   m_AnchoredPosition: {x: -26.27002, y: -439.26}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1904193213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1904193211}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33cd727b2eaac4c4ead1ae4be136158f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogue
+  textComponent: {fileID: 0}
+  lines:
+  - Hello there
+  textSpeed: 3.23
 --- !u!114 &1904193214
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -66204,7 +66375,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37b422b73d279ce41889849f6016fec2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::tr
-  cutsceneDuration: 49.79447
+  cutsceneDuration: 51.36666
 --- !u!1001 &2026396387
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -67558,6 +67729,7 @@ GameObject:
   - component: {fileID: 2084355058}
   - component: {fileID: 2084355061}
   - component: {fileID: 2084355060}
+  - component: {fileID: 2084355059}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -67584,6 +67756,22 @@ RectTransform:
   m_AnchoredPosition: {x: -26.27002, y: -439.26}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2084355059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2084355057}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33cd727b2eaac4c4ead1ae4be136158f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogue
+  textComponent: {fileID: 0}
+  lines:
+  - Hello there
+  textSpeed: 3.23
 --- !u!114 &2084355060
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67633,6 +67821,7 @@ GameObject:
   - component: {fileID: 2085143222}
   - component: {fileID: 2085143225}
   - component: {fileID: 2085143224}
+  - component: {fileID: 2085143223}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -67659,6 +67848,22 @@ RectTransform:
   m_AnchoredPosition: {x: -26.27002, y: -439.26}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2085143223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085143221}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33cd727b2eaac4c4ead1ae4be136158f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogue
+  textComponent: {fileID: 0}
+  lines:
+  - Hello there
+  textSpeed: 3.23
 --- !u!114 &2085143224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70076,6 +70281,7 @@ SceneRoots:
   - {fileID: 1498583129}
   - {fileID: 1306880503}
   - {fileID: 963465775}
+  - {fileID: 1718270164}
   - {fileID: 1731391934}
   - {fileID: 83560939}
   - {fileID: 1180402605}

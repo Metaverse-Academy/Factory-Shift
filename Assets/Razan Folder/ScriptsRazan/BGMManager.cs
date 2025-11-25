@@ -11,9 +11,9 @@ public class BGMManager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject); // لا تدمر عند تحميل مشهد جديد
         }
-    //     else
-    //     {
-    //        Destroy(gameObject); // إذا كان هناك نسخة أخرى، نحذفها لتفادي التكرار
-    //    }
+        else
+        {
+            Destroy(gameObject); // إذا كان هناك نسخة أخرى، نحذفها لتفادي التكرار
+        }
     }
 }
