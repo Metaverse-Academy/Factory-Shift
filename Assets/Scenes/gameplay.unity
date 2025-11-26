@@ -47469,7 +47469,7 @@ MonoBehaviour:
     m_ActionId: 02106c02-5d1d-4f26-9389-923f82e9d8ce
     m_ActionName: 'Player/crawl[/Keyboard/ctrl]'
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: Keyboard&Mouse
+  m_DefaultControlScheme: 
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}

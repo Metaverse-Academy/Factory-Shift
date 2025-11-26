@@ -228,7 +228,7 @@
                 {
                     "name": "",
                     "id": "d8ad2980-4e49-457a-8c33-d3cfeba55f5b",
-                    "path": "<Gamepad>/leftStickPress",
+                    "path": "<Gamepad>/rightTrigger",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
@@ -294,7 +294,7 @@
                 {
                     "name": "",
                     "id": "3a4a3806-093a-4ff0-8ba0-10d4b8c3f8d7",
-                    "path": "<Gamepad>/buttonNorth",
+                    "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",

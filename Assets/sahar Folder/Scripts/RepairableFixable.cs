@@ -425,11 +425,7 @@ if (fanStartClip != null)
     else
         AudioSource.PlayClipAtPoint(fanStartClip, transform.position, fanStartVolume);
 }
-
-
-            
-
-        // ✅ NEW: notify multi-repair objective manager
+        // NEW: notify multi-repair objective manager
         OnRepaired?.Invoke(this);
     }
 
