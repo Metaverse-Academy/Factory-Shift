@@ -58,12 +58,57 @@
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
                     "name": "crawl",
                     "type": "Button",
                     "id": "02106c02-5d1d-4f26-9389-923f82e9d8ce",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "repair",
+                    "type": "Button",
+                    "id": "90a2305a-14cb-4de8-8b57-07a7faf49b6c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "next",
+                    "type": "Button",
+                    "id": "e076615e-b880-4562-828b-8ab58e9febb3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "previous",
+                    "type": "Button",
+                    "id": "e21d65af-13de-4d54-9d3d-b98ce7065b98",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "interact_g",
+                    "type": "Button",
+                    "id": "f070479a-a1bb-4d7f-b488-525d424429ef",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Press",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "hold_g",
+                    "type": "Button",
+                    "id": "6408aec8-b37c-4336-9174-ce678031eca0",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -293,23 +338,67 @@
                 },
                 {
                     "name": "",
-                    "id": "3a4a3806-093a-4ff0-8ba0-10d4b8c3f8d7",
-                    "path": "<Gamepad>/rightShoulder",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "Interact",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "6020cae8-6e26-43df-8469-aedac4ddc6fc",
                     "path": "<Keyboard>/c",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "crawl",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6e0f2f70-a19b-498e-9568-504080fa1707",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "repair",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c13112e0-281d-4447-a468-9212c75458a3",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "next",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6fe6d6c6-1911-44a8-ac2a-fd9138ed640c",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "previous",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1bf4dbc1-299d-41cd-9ee5-f7b936abc3f6",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "interact_g",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "71fb33ef-65b8-477d-9c46-87163ee3069a",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "hold_g",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -2,14 +2,19 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 
 public class TypewriterTMP : MonoBehaviour
 {
+    [Header("Player")]
+    [SerializeField] private string playerTag = "Player";
     [Header("References")]
     public TextMeshProUGUI textComponent;
 
     [Header("Text")]
     [TextArea] public string fullText;
+    [SerializeField] private InputActionReference interactAction;   // زر E
+    [SerializeField] private InputActionReference gamepadReadAction; // زر R1
 
     [Header("Timing")]
     public float charDelay = 0.04f;        // الوقت بين كل حرف
@@ -47,6 +52,7 @@ public class TypewriterTMP : MonoBehaviour
         // نخفي الزر في البداية
         if (continueButton != null)
             continueButton.SetActive(false);
+            
 
         // نتاكد ان لوحة Night 2 مخفية
         if (night2CanvasGroup != null)
@@ -161,6 +167,14 @@ public class TypewriterTMP : MonoBehaviour
     {
         if (continueButton != null)
             continueButton.SetActive(true);
+            if (interactAction != null)
+            {
+                interactAction.action.Enable();
+            }
+            if (gamepadReadAction != null)
+            {
+                gamepadReadAction.action.Enable();
+            }
     }
 
     // ⬇ هذه الدالة تستدعيها من الزر
@@ -172,6 +186,14 @@ public class TypewriterTMP : MonoBehaviour
         // نخفي الزر عشان ما يقدر يضغطه مرة ثانية
         if (continueButton != null)
             continueButton.SetActive(false);
+            if (interactAction != null)
+            {
+                interactAction.action.Disable();
+            }
+            if (gamepadReadAction != null)
+            {
+                gamepadReadAction.action.Disable();
+            }
 
         StartCoroutine(Night2Sequence());
     }

@@ -270,6 +270,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 266556657}
   m_CullTransparentMesh: 1
+--- !u!1 &376394478
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 376394480}
+  - component: {fileID: 376394479}
+  m_Layer: 0
+  m_Name: GameObject (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &376394479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376394478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2fc7af1118bfc04ca4b1293b8bfefa2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ControllerButtonTrigger
+  targetButton: {fileID: 2116978514}
+--- !u!4 &376394480
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376394478}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -78.99548, y: 0, z: 130.34814}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &434180018
 GameObject:
   m_ObjectHideFlags: 0
@@ -801,17 +846,17 @@ MonoBehaviour:
   m_MoveRepeatDelay: 0.5
   m_MoveRepeatRate: 0.1
   m_XRTrackingOrigin: {fileID: 0}
-  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_CancelAction: {fileID: 7727032971491509709, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_LeftClickAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MiddleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_RightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_PointAction: {fileID: -1654692200621890270, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_MoveAction: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_SubmitAction: {fileID: 392368643174621059, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_CancelAction: {fileID: 7727032971491509709, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_LeftClickAction: {fileID: 3001919216989983466, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_MiddleClickAction: {fileID: -2185481485913320682, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_RightClickAction: {fileID: -4090225696740746782, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
@@ -841,6 +886,53 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &848233474
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 848233476}
+  - component: {fileID: 848233475}
+  m_Layer: 0
+  m_Name: InputSchemeUIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &848233475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 848233474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1699dedafbf21ab448394e85e1be7fd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputSchemeUIManager
+  playerInput: {fileID: 1697514751}
+  keyboardMouseScheme: Keyboard&Mouse
+  gamepadScheme: Gamepad
+--- !u!4 &848233476
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 848233474}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -105.44542, y: 9.01412, z: -69.31443}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1112,7 +1204,7 @@ RectTransform:
   m_GameObject: {fileID: 1121280335}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2116978513}
@@ -1142,7 +1234,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Continue
+  m_text: (X or click Continue)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1169,8 +1261,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 17.43
+  m_fontSizeBase: 17.43
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1673,9 +1765,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d896ed9b00e3f45e6b194744d9b36140, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TypewriterTMP
+  playerTag: Player
   textComponent: {fileID: 1393771720}
   fullText: "Fan repair (x1):                        250.00$\nSpare parts(x1):                        
     60.00$\n\n\n\n\n                                          Total: 310.00$"
+  interactAction: {fileID: 927316559073305242, guid: 20d7f63b1fa2f3948a553dc4c39d79a0, type: 3}
+  gamepadReadAction: {fileID: -4845563846531938076, guid: 20d7f63b1fa2f3948a553dc4c39d79a0, type: 3}
   charDelay: 0.04
   punctuationDelay: 0.18
   audioSource: {fileID: 1292304763}
@@ -1787,6 +1882,116 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1393771717}
   m_CullTransparentMesh: 1
+--- !u!1 &1697514750
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1697514752}
+  - component: {fileID: 1697514751}
+  m_Layer: 0
+  m_Name: GameObject (1)
+  m_TagString: Player
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1697514751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1697514750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: 20d7f63b1fa2f3948a553dc4c39d79a0, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 68fe9a09-2640-4980-b7e3-5c4569d57ec2
+    m_ActionName: 'Player/Look[/DualSenseGamepadHID/rightStick,/DualSenseGamepadHID1/rightStick,/Mouse/delta]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ac211ff0-c282-49e7-9cf7-a25d60f923ed
+    m_ActionName: 'Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow,/DualSenseGamepadHID/leftStick,/DualSenseGamepadHID1/leftStick]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 89986562-04f8-424f-8f0c-972774ae3db1
+    m_ActionName: 'Player/Jump[/DualSenseGamepadHID/buttonSouth,/DualSenseGamepadHID1/buttonSouth,/Keyboard/space]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0412f6eb-014b-4a27-ad27-c8a5fd92d145
+    m_ActionName: 'Player/Sprint[/Keyboard/leftShift,/DualSenseGamepadHID/rightTrigger,/DualSenseGamepadHID1/rightTrigger]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 4228d73e-9974-49bb-a407-47bce1498e9d
+    m_ActionName: 'Player/Crouch[/Keyboard/ctrl,/DualSenseGamepadHID/buttonEast,/DualSenseGamepadHID1/buttonEast]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: c725e9b5-32ea-486f-97fe-121309bd4347
+    m_ActionName: 'Player/Interact[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 02106c02-5d1d-4f26-9389-923f82e9d8ce
+    m_ActionName: 'Player/crawl[/Keyboard/c]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 90a2305a-14cb-4de8-8b57-07a7faf49b6c
+    m_ActionName: 'Player/repair[/DualSenseGamepadHID/leftShoulder,/DualSenseGamepadHID1/leftShoulder]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: e076615e-b880-4562-828b-8ab58e9febb3
+    m_ActionName: 'Player/next[/DualSenseGamepadHID/rightTrigger,/DualSenseGamepadHID1/rightTrigger]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: e21d65af-13de-4d54-9d3d-b98ce7065b98
+    m_ActionName: 'Player/previous[/DualSenseGamepadHID/leftTrigger,/DualSenseGamepadHID1/leftTrigger]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f070479a-a1bb-4d7f-b488-525d424429ef
+    m_ActionName: 'Player/interact_g[/DualSenseGamepadHID/rightShoulder,/DualSenseGamepadHID1/rightShoulder]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 6408aec8-b37c-4336-9174-ce678031eca0
+    m_ActionName: 'Player/hold_g[/DualSenseGamepadHID/rightShoulder,/DualSenseGamepadHID1/rightShoulder]'
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
+--- !u!4 &1697514752
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1697514750}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -78.99548, y: 0, z: 130.34814}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1810160284
 GameObject:
   m_ObjectHideFlags: 0
@@ -2086,3 +2291,6 @@ SceneRoots:
   - {fileID: 1292304764}
   - {fileID: 1162186432}
   - {fileID: 784358491}
+  - {fileID: 848233476}
+  - {fileID: 1697514752}
+  - {fileID: 376394480}

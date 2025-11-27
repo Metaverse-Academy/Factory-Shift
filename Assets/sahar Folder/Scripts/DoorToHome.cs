@@ -10,17 +10,23 @@ public class DoorToHome : MonoBehaviour
     [SerializeField] private string playerTag = "Player";
 
     [Header("Requirements")]
-    [Tooltip("Optional: door only works if this repair is completed.")]
-    [SerializeField] private RepairableFixable[] requiredRepair;  
-
+    [Tooltip("Door only works if ALL of these repairs are completed (optional).")]
+    [SerializeField] private RepairableFixable[] requiredRepair;
 
     [Header("Input & UI")]
-    [SerializeField] private InputActionReference interactAction; // bind to E
-    [SerializeField] private GameObject promptUI;                 // "E to go home"
+    [SerializeField] private InputActionReference interactAction;
+    [SerializeField] private InputActionReference gamepadInteractAction;
+    [SerializeField] private GameObject promptUI;                 // parent root object
+
+    [Header("Prompt Variants")]
+    [Tooltip("Child with keyboard text/icon: 'E to go home'")]
+    [SerializeField] private GameObject keyboardPrompt;
+    [Tooltip("Child with controller text/icon: 'X / A to go home'")]
+    [SerializeField] private GameObject gamepadPrompt;
 
     [Header("Scene + Fade")]
-    [SerializeField] private string targetSceneName = "HomeScene"; // <-- change to your scene name
-    [SerializeField] private CanvasGroup fadeGroup;                // full-screen black image
+    [SerializeField] private string targetSceneName = "HomeScene";
+    [SerializeField] private CanvasGroup fadeGroup;    // full-screen black image
     [SerializeField] private float fadeDuration = 1f;
 
     private bool inRange;
@@ -35,31 +41,59 @@ public class DoorToHome : MonoBehaviour
     private void OnEnable()
     {
         if (interactAction != null)
+        {
+            interactAction.action.Enable();
             interactAction.action.performed += OnInteract;
+        }
+        if (gamepadInteractAction != null)
+        {
+            gamepadInteractAction.action.Enable();
+            gamepadInteractAction.action.performed += OnInteract;
+        }
 
         if (promptUI) promptUI.SetActive(false);
 
-        // make sure fade starts transparent in gameplay scene
+        // fade canvas starts transparent
         if (fadeGroup)
         {
             fadeGroup.alpha = 0f;
             fadeGroup.gameObject.SetActive(true);
+        }
+
+        // listen for scheme changes (from InputSchemeUIManager singleton)
+        if (InputSchemeUIManager.Instance != null)
+        {
+            InputSchemeUIManager.Instance.OnSchemeChanged += HandleSchemeChanged;
         }
     }
 
     private void OnDisable()
     {
         if (interactAction != null)
+        {
             interactAction.action.performed -= OnInteract;
+            interactAction.action.Disable();
+        }
+        if (gamepadInteractAction != null)
+        {
+            gamepadInteractAction.action.performed -= OnInteract;
+            gamepadInteractAction.action.Disable();
+        }
+
+        if (InputSchemeUIManager.Instance != null)
+        {
+            InputSchemeUIManager.Instance.OnSchemeChanged -= HandleSchemeChanged;
+        }
     }
 
     // 👇 Helper: can the player use this door now?
     private bool CanUseDoor()
     {
-        // if no requirement assigned, door is always usable
-        if (requiredRepair == null) return true;
+        // no requirements → always usable
+        if (requiredRepair == null || requiredRepair.Length == 0)
+            return true;
 
-        // only usable if the repair is finished
+        // all required repairs must be complete
         foreach (var repair in requiredRepair)
         {
             if (repair == null) continue;
@@ -73,39 +107,25 @@ public class DoorToHome : MonoBehaviour
         if (!other.CompareTag(playerTag)) return;
         inRange = true;
 
-        // show prompt ONLY if repaired
-        if (promptUI) 
-            promptUI.SetActive(CanUseDoor());
+        RefreshPromptVisual();
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag(playerTag)) return;
         inRange = false;
-        if (promptUI) promptUI.SetActive(false);
+
+        RefreshPromptVisual();
     }
 
     private void Update()
     {
-        // If player is standing at the door while repair finishes,
-        // update the prompt visibility.
-        if (!promptUI) return;
-
-        if (!inRange || !CanUseDoor())
-        {
-            if (promptUI.activeSelf)
-                promptUI.SetActive(false);
-        }
-        else
-        {
-            if (!promptUI.activeSelf)
-                promptUI.SetActive(true);
-        }
+        // Player might finish repair while standing at door → update prompt
+        RefreshPromptVisual();
     }
 
     private void OnInteract(InputAction.CallbackContext ctx)
     {
-        // must be in range, not already fading, AND repair finished
         if (!inRange || isFading) return;
         if (!CanUseDoor()) return;
 
@@ -116,7 +136,6 @@ public class DoorToHome : MonoBehaviour
     {
         if (!fadeGroup)
         {
-            // no fade? just load
             SceneManager.LoadScene(targetSceneName);
             yield break;
         }
@@ -138,5 +157,39 @@ public class DoorToHome : MonoBehaviour
         fadeGroup.alpha = 1f;
 
         SceneManager.LoadScene(targetSceneName);
+    }
+
+    // =======================
+    //   UI prompt helpers
+    // =======================
+    private void RefreshPromptVisual()
+    {
+        if (!promptUI) return;
+
+        bool shouldShow = inRange && CanUseDoor();
+
+        if (!shouldShow)
+        {
+            // hide everything
+            promptUI.SetActive(false);
+            if (keyboardPrompt) keyboardPrompt.SetActive(false);
+            if (gamepadPrompt)  gamepadPrompt.SetActive(false);
+            return;
+        }
+
+        promptUI.SetActive(true);
+
+        bool useGamepad = InputSchemeUIManager.Instance != null &&
+                          InputSchemeUIManager.Instance.IsGamepad;
+
+        if (keyboardPrompt) keyboardPrompt.SetActive(!useGamepad);
+        if (gamepadPrompt)  gamepadPrompt.SetActive(useGamepad);
+    }
+
+    private void HandleSchemeChanged(bool isGamepad)
+    {
+        // when scheme changes and player is in range, just refresh
+        if (inRange)
+            RefreshPromptVisual();
     }
 }

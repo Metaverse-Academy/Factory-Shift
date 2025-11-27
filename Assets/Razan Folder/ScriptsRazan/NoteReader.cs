@@ -10,22 +10,27 @@ public class NoteReader : MonoBehaviour
     [SerializeField] private MonoBehaviour[] disableWhileReading;
 
     [Header("Input & UI")]
-    [SerializeField] private InputActionReference interactAction; // bind to E
-    [SerializeField] private GameObject promptUI;                 // "E to open note"
-    [SerializeField] private GameObject noteUI;                   // panel with book/pages
+    [SerializeField] private InputActionReference interactAction;   // زر E
+    [SerializeField] private InputActionReference gamepadReadAction; // زر R1
+    [SerializeField] private GameObject promptUI;
 
-    // [Header("Objectives (optional)")]
-    // [SerializeField] private ObjectiveManager objectiveManager;
-    [Tooltip("Call OnNoteCollected once when player finishes reading (closes the note).")]
-    [SerializeField] private bool reportNoteObjectiveOnClose = true;
+    [Header("Different Notes")]
+    [SerializeField] private GameObject keyboardNoteUI;  // يظهر عند ضغط E
+    [SerializeField] private GameObject gamepadNoteUI;   // يظهر عند ضغط R1
+
+    [Header("Prompt Variants")]
+    [SerializeField] private GameObject keyboardPrompt;
+    [SerializeField] private GameObject gamepadPrompt;
+
     [Header("Objectives (optional)")]
-[SerializeField] private Night1ObjectiveManager night1Objectives;
-private bool reportedNote = false;
-
+    [SerializeField] private Night1ObjectiveManager night1Objectives;
+    [SerializeField] private bool reportNoteObjectiveOnClose = true;
 
     private bool inRange;
     private bool noteOpen;
-    private bool noteObjectiveReported = false;
+    private bool hasReportedNoteObjective = false;
+
+    private GameObject currentOpenedNote = null;
 
     private void Reset()
     {
@@ -35,14 +40,26 @@ private bool reportedNote = false;
 
     private void OnEnable()
     {
+        // Keyboard (E)
         if (interactAction != null)
         {
             interactAction.action.Enable();
             interactAction.action.performed += OnInteract;
         }
 
+        // Gamepad (R1)
+        if (gamepadReadAction != null)
+        {
+            gamepadReadAction.action.Enable();
+            gamepadReadAction.action.performed += OnGamepadRead;
+        }
+
         if (promptUI) promptUI.SetActive(false);
-        if (noteUI)   noteUI.SetActive(false);
+        if (keyboardNoteUI) keyboardNoteUI.SetActive(false);
+        if (gamepadNoteUI) gamepadNoteUI.SetActive(false);
+
+        if (InputSchemeUIManager.Instance != null)
+            InputSchemeUIManager.Instance.OnSchemeChanged += HandleSchemeChanged;
     }
 
     private void OnDisable()
@@ -52,6 +69,15 @@ private bool reportedNote = false;
             interactAction.action.performed -= OnInteract;
             interactAction.action.Disable();
         }
+
+        if (gamepadReadAction != null)
+        {
+            gamepadReadAction.action.performed -= OnGamepadRead;
+            gamepadReadAction.action.Disable();
+        }
+
+        if (InputSchemeUIManager.Instance != null)
+            InputSchemeUIManager.Instance.OnSchemeChanged -= HandleSchemeChanged;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -59,8 +85,8 @@ private bool reportedNote = false;
         if (!other.CompareTag(playerTag)) return;
         inRange = true;
 
-        if (!noteOpen && promptUI)
-            promptUI.SetActive(true);
+        if (!noteOpen)
+            RefreshPromptVisual();
     }
 
     private void OnTriggerExit(Collider other)
@@ -70,72 +96,110 @@ private bool reportedNote = false;
 
         if (promptUI) promptUI.SetActive(false);
 
-        // if player walks away while reading, close the note
         if (noteOpen)
             CloseNote();
     }
 
+    // =============== INPUT HANDLERS =================
+
     private void OnInteract(InputAction.CallbackContext ctx)
     {
-        if (!inRange) return;   // only if close to note
+        if (!inRange) return;
 
         if (!noteOpen)
-        {
-            OpenNote();
-        }
+            OpenNote(keyboardNoteUI);  // فتح كانفس الكيبورد
         else
-        {
             CloseNote();
-        }
     }
 
-   private void OpenNote()
-{
-    noteOpen = true;
-
-    if (promptUI) promptUI.SetActive(false);
-    if (noteUI) noteUI.SetActive(true);
-
-    foreach (var comp in disableWhileReading)
-        if (comp) comp.enabled = false;
-
-    Cursor.lockState = CursorLockMode.None;
-    Cursor.visible = true;
-
-    // ✅ report objective once
-    if (!reportedNote)
+    private void OnGamepadRead(InputAction.CallbackContext ctx)
     {
-        reportedNote = true;
-        night1Objectives?.OnNoteRead();
-    }
-}
+        if (!inRange) return;
 
+        if (!noteOpen)
+            OpenNote(gamepadNoteUI);  // فتح كانفس الكنترولر
+        else
+            CloseNote();
+
+            Debug.Log("Gamepad Read Action Triggered");
+    }
+
+    // =============== OPEN & CLOSE NOTE ===============
+
+    private void OpenNote(GameObject ui)
+    {
+        if (ui == null) return;
+
+        noteOpen = true;
+        currentOpenedNote = ui;
+
+        if (promptUI) promptUI.SetActive(false);
+
+        ui.SetActive(true);
+
+        foreach (var comp in disableWhileReading)
+            if (comp) comp.enabled = false;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
 
     private void CloseNote()
     {
         noteOpen = false;
 
-        if (noteUI) noteUI.SetActive(false);
+        if (currentOpenedNote)
+            currentOpenedNote.SetActive(false);
 
-        // re-enable movement / looking
+        currentOpenedNote = null;
+
         foreach (var comp in disableWhileReading)
-        {
             if (comp) comp.enabled = true;
-        }
 
-        // relock mouse for gameplay
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // show prompt again if still inside trigger
-        if (inRange && promptUI)
-            promptUI.SetActive(true);
+        if (inRange)
+            RefreshPromptVisual();
+        else if (promptUI)
+            promptUI.SetActive(false);
 
-        // 🔹 Report objective ONCE when the note was properly read & closed
-        if (reportNoteObjectiveOnClose && !noteObjectiveReported)
+        if (reportNoteObjectiveOnClose && !hasReportedNoteObjective)
         {
-            noteObjectiveReported = true;
+            hasReportedNoteObjective = true;
             night1Objectives?.OnNoteRead();
         }
+    }
+
+    // =============== PROMPT DISPLAY ===============
+
+    private void RefreshPromptVisual()
+    {
+        if (!promptUI) return;
+
+        bool shouldShow = inRange && !noteOpen;
+
+        if (!shouldShow)
+        {
+            promptUI.SetActive(false);
+            if (keyboardPrompt) keyboardPrompt.SetActive(false);
+            if (gamepadPrompt)  gamepadPrompt.SetActive(false);
+            return;
+        }
+
+        promptUI.SetActive(true);
+
+        bool useGamepad =
+            InputSchemeUIManager.Instance != null &&
+            InputSchemeUIManager.Instance.IsGamepad;
+
+        if (keyboardPrompt) keyboardPrompt.SetActive(!useGamepad);
+        if (gamepadPrompt) gamepadPrompt.SetActive(useGamepad);
+    }
+
+    private void HandleSchemeChanged(bool isGamepad)
+    {
+        if (inRange && !noteOpen)
+            RefreshPromptVisual();
     }
 }

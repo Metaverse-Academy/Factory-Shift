@@ -14,8 +14,15 @@ public class VentPortalInteract : MonoBehaviour
     [SerializeField] private Transform faceDirection;
 
     [Header("UI & Input")]
-    [SerializeField] private InputActionReference interactAction;   // E
-    [SerializeField] private GameObject promptUI;
+    [SerializeField] private InputActionReference interactAction; 
+    [SerializeField] private InputActionReference gamepadInteractAction;
+    [SerializeField] private GameObject promptUI;                   // parent root
+
+    [Header("Prompt Variants")]
+    [Tooltip("Child object with 'E to interact' or keyboard icon.")]
+    [SerializeField] private GameObject keyboardPrompt;
+    [Tooltip("Child object with gamepad button icon/text.")]
+    [SerializeField] private GameObject gamepadPrompt;
 
     [Header("Behavior")]
     [SerializeField] private bool forceCrawlAfterTeleport = true;
@@ -24,7 +31,6 @@ public class VentPortalInteract : MonoBehaviour
     [Header("Objective Hook (optional)")]
     [SerializeField] private MultiRepairObjective multiObjective;
     [SerializeField] private Night1ObjectiveManager night1ObjectiveManager;
-   
 
     public enum PortalMode { None, EnterVents, ExitVents }
     [SerializeField] private PortalMode portalMode = PortalMode.None;
@@ -49,7 +55,20 @@ public class VentPortalInteract : MonoBehaviour
             interactAction.action.Enable();
             interactAction.action.performed += OnInteract;
         }
-        if (promptUI) promptUI.SetActive(false);
+        if (gamepadInteractAction != null)
+        {
+            gamepadInteractAction.action.Enable();
+            gamepadInteractAction.action.performed += OnInteract;
+        }
+
+        // start hidden
+        SetPromptVisible(false);
+
+        // listen for control scheme changes (if manager exists)
+        if (InputSchemeUIManager.Instance != null)
+        {
+            InputSchemeUIManager.Instance.OnSchemeChanged += HandleSchemeChanged;
+        }
     }
 
     private void OnDisable()
@@ -58,6 +77,11 @@ public class VentPortalInteract : MonoBehaviour
         {
             interactAction.action.performed -= OnInteract;
             interactAction.action.Disable();
+        }
+
+        if (InputSchemeUIManager.Instance != null)
+        {
+            InputSchemeUIManager.Instance.OnSchemeChanged -= HandleSchemeChanged;
         }
     }
 
@@ -71,10 +95,10 @@ public class VentPortalInteract : MonoBehaviour
 
         playerRoot = root;
         playerMove = root.GetComponent<PlayerMovement>();
-        playerRb = root.GetComponent<Rigidbody>();
-        inRange = true;
+        playerRb   = root.GetComponent<Rigidbody>();
+        inRange    = true;
 
-        if (promptUI) promptUI.SetActive(true);
+        SetPromptVisible(true);
     }
 
     private void OnTriggerExit(Collider other)
@@ -82,12 +106,12 @@ public class VentPortalInteract : MonoBehaviour
         var root = other.transform.root;
         if (!root.CompareTag(playerTag)) return;
 
-        inRange = false;
+        inRange    = false;
         playerRoot = null;
         playerMove = null;
-        playerRb = null;
+        playerRb   = null;
 
-        if (promptUI) promptUI.SetActive(false);
+        SetPromptVisible(false);
     }
 
     private void OnInteract(InputAction.CallbackContext ctx)
@@ -99,7 +123,7 @@ public class VentPortalInteract : MonoBehaviour
 
         lockoutUntil[playerRoot.GetInstanceID()] = Time.time + reenterLockout;
 
-        // ✅ Notify objective system
+        // ✅ Notify night 2 multi-objective
         if (multiObjective != null)
         {
             if (portalMode == PortalMode.EnterVents)
@@ -107,21 +131,22 @@ public class VentPortalInteract : MonoBehaviour
             else if (portalMode == PortalMode.ExitVents)
                 multiObjective.OnExitVents();
         }
-           if (night1ObjectiveManager != null)
+
+        // ✅ Notify night 1 objectives
+        if (night1ObjectiveManager != null)
         {
             if (portalMode == PortalMode.EnterVents)
                 night1ObjectiveManager.OnEnterVents();
             else if (portalMode == PortalMode.ExitVents)
                 night1ObjectiveManager.OnExitVents();
         }
-    
 
-        if (promptUI) promptUI.SetActive(false);
+        SetPromptVisible(false);
 
-        inRange = false;
+        inRange    = false;
         playerRoot = null;
         playerMove = null;
-        playerRb = null;
+        playerRb   = null;
     }
 
     private void TeleportPlayer()
@@ -135,7 +160,6 @@ public class VentPortalInteract : MonoBehaviour
 #endif
             playerRb.angularVelocity = Vector3.zero;
         }
-        
 
         float yaw = (faceDirection ? faceDirection.rotation : destination.rotation).eulerAngles.y;
         Quaternion yawOnly = Quaternion.Euler(0f, yaw, 0f);
@@ -143,23 +167,18 @@ public class VentPortalInteract : MonoBehaviour
         playerRoot.SetPositionAndRotation(destination.position, yawOnly);
         Physics.SyncTransforms();
 
+        // ENTER vent portal (forceCrawlAfterTeleport = true)
         if (forceCrawlAfterTeleport)
+        {
             playerMove?.ForceEnterCrawl();
+            playerMove?.SetInVent(true);   // mark as in vents
+        }
         else
+        {
+            // EXIT vent portal
             playerMove?.ExitVentUpright(false);
-            // ENTER vent portal (forceCrawlAfterTeleport = true)
-if (forceCrawlAfterTeleport)
-{
-    playerMove?.ForceEnterCrawl();
-    playerMove?.SetInVent(true);   // 🔸 mark as in vents
-}
-else
-{
-    // EXIT vent portal
-    playerMove?.ExitVentUpright(false);
-    playerMove?.SetInVent(false);  // 🔹 back to normal
-}
-
+            playerMove?.SetInVent(false);  // back to normal
+        }
 
         var anim = playerRoot.GetComponentInChildren<Animator>();
         if (anim) anim.Update(0f);
@@ -171,5 +190,34 @@ else
         Gizmos.color = Color.white;
         Gizmos.DrawWireSphere(destination.position, 0.25f);
         Gizmos.DrawRay(destination.position, destination.forward * 0.6f);
+    }
+
+    // =============================
+    //  UI prompt helpers
+    // =============================
+    private void SetPromptVisible(bool visible)
+    {
+        if (promptUI)
+            promptUI.SetActive(visible);
+
+        if (!visible)
+        {
+            if (keyboardPrompt) keyboardPrompt.SetActive(false);
+            if (gamepadPrompt)  gamepadPrompt.SetActive(false);
+            return;
+        }
+
+        bool useGamepad = InputSchemeUIManager.Instance != null &&
+                          InputSchemeUIManager.Instance.IsGamepad;
+
+        if (keyboardPrompt) keyboardPrompt.SetActive(!useGamepad);
+        if (gamepadPrompt)  gamepadPrompt.SetActive(useGamepad);
+    }
+
+    private void HandleSchemeChanged(bool isGamepad)
+    {
+        // If the player is in range and scheme changes, just refresh which variant is visible
+        if (inRange)
+            SetPromptVisible(true);
     }
 }

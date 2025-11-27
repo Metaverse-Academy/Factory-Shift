@@ -32,6 +32,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/cutescene.unity
     guid: 9627508a128887d40844852d1b2e7ce4
+  - enabled: 1
+    path: Assets/Scenes/final scene.unity
+    guid: 2f34e92e54126104f86fbb353d2baf17
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

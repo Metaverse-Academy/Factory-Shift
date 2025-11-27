@@ -11,18 +11,39 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private string playerTag = "Player";
 
     [Header("Input (New Input System)")]
-    [Tooltip("Bind to F (Hold) in your actions asset.")]
-    [SerializeField] private InputActionReference holdFixAction; 
-    [Tooltip("Key to hit during skill-check (e.g., Space).")]
+    [Tooltip("Bind to E (Hold) in your actions asset (keyboard) + gamepad button.")]
+    [SerializeField] private InputActionReference holdFixAction;
+    [SerializeField] private InputActionReference gamepadHoldFixAction;
+
+    [Tooltip("Keyboard key to hit during skill-check (e.g., Space).")]
     [SerializeField] private Key skillCheckKey = Key.Space;
 
+    [Header("Skill Check Input (Gamepad)")]
+    [Tooltip("Bind this to L1 / Left Bumper for the skill-check press.")]
+    [SerializeField] private InputActionReference skillCheckAction; 
+    [SerializeField] private InputActionReference gamepadSkillCheckAction;
+
     [Header("UI: Prompt")]
-    [SerializeField] private GameObject promptRoot;   // "HOLD E TO FIX"
-    [SerializeField] private TMP_Text promptLabel;  
+    [SerializeField] private GameObject promptRoot;   // root object for prompt
+
+    [Tooltip("Keyboard prompt (e.g. 'HOLD E TO FIX')")]
+    [SerializeField] private GameObject keyboardPrompt;
+
+    [Tooltip("Gamepad prompt (e.g. 'HOLD X TO FIX')")]
+    [SerializeField] private GameObject gamepadPrompt;
+
+    [SerializeField] private TMP_Text promptLabel;
     [SerializeField] private string promptText = "HOLD E TO FIX";
 
     [Header("UI: Hold Progress")]
     [SerializeField] private CanvasGroup holdGroup;   // show while holding E
+
+    [Tooltip("Keyboard version of the hold UI (ring + key text/icon).")]
+    [SerializeField] private GameObject keyboardHoldUI;
+
+    [Tooltip("Gamepad version of the hold UI (ring + button text/icon).")]
+    [SerializeField] private GameObject gamepadHoldUI;
+
     [Tooltip("Radial Image (Fill Method = Radial 360).")]
     [SerializeField] private Image holdFill;
 
@@ -50,7 +71,8 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private float successBonus = 0.12f;
     [SerializeField] private float failPenalty = 0.18f;
     [SerializeField] private bool useUnscaledTimeForSkill = true;
-        // ---------------- Random Skill Check Position ----------------
+
+    // ---------------- Random Skill Check Position ----------------
     [Header("Random Skill Check Position")]
     [Tooltip("If true, the skillcheck UI appears at random screen positions.")]
     [SerializeField] private bool randomizeSkillCheckPosition = false;
@@ -60,7 +82,7 @@ public class RepairableFixable : MonoBehaviour
 
     [Tooltip("Random offset range from the center (anchoredPosition).")]
     [SerializeField] private Vector2 randomOffsetMin = new Vector2(-250f, -140f);
-    [SerializeField] private Vector2 randomOffsetMax = new Vector2( 250f,  140f);
+    [SerializeField] private Vector2 randomOffsetMax = new Vector2(250f, 140f);
 
     private Vector2 skillRootRestPos;
     private const float CLOCK_ZERO_IS_UP = 90f; // converts Unity's 0°=right to 0°=up
@@ -77,11 +99,11 @@ public class RepairableFixable : MonoBehaviour
     [Header("Repair Loop SFX")]
     [SerializeField] private AudioSource repairSource;   // add an AudioSource, Play On Awake OFF
     [SerializeField] private AudioClip repairLoop;       // your loop/ambience clip
-    [SerializeField, Range(0f,1f)] private float repairVolume = 0.8f;
+    [SerializeField, Range(0f, 1f)] private float repairVolume = 0.8f;
 
     [Header("Repair Complete SFX")]
     [SerializeField] private AudioClip repairCompleteClip; // assign your "generator complete" sound
-    [SerializeField, Range(0f,1f)] private float repairCompleteVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float repairCompleteVolume = 1f;
     [SerializeField] private float repairFadeIn = 0.12f;
     [SerializeField] private float repairFadeOut = 0.20f;
     [SerializeField] private bool loopOnlyWhileHolding = false;
@@ -89,7 +111,6 @@ public class RepairableFixable : MonoBehaviour
     // internal
     private bool repairLoopPlaying;
     private bool wasHolding;
-    
 
     [SerializeField] private ParticleSystem failExplosionPrefab;
     [Tooltip("Where to place the explosion. If null, uses this object's position.")]
@@ -114,25 +135,30 @@ public class RepairableFixable : MonoBehaviour
     [SerializeField] private VentMonsterAttack ventMonster;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private bool triggerMonsterOnFail = true;
+
     [Header("Fan Animation (optional)")]
     [SerializeField] private Animator fanAnimator;          // drag the fan's Animator here
     [SerializeField] private string startFanTrigger = "StartFan";
+
     [Header("Fan Start SFX (optional)")]
     [SerializeField] private AudioSource fanAudioSource;   // can be on fan object or this object
     [SerializeField] private AudioClip fanStartClip;
     [SerializeField, Range(0f, 1f)] private float fanStartVolume = 1f;
+
     public bool IsRepaired => repaired;
 
-    // ✅ NEW: event for multi-repair objective manager
+    // event for multi-repair objective manager
     public event Action<RepairableFixable> OnRepaired;
+
     private bool monsterAlreadyTriggered;
+
     // state
     private bool playerInRange;
     private bool holding;
     private float progress01; // 0..1
     private float nextSkillCheckTime;
     private bool skillActive;
-    private float needleAngleClock; // 0..360 in CLOCK convention (0=up, cw+)
+    private float needleAngleClock; // 0..360 in CLOCK convention (0=up)
     private float enteredZoneTime = -999f;
     private bool repaired;
 
@@ -154,22 +180,47 @@ public class RepairableFixable : MonoBehaviour
         ShowPrompt(false);
         ShowHold(false);
         ShowSkill(false);
-                // Cache skill UI default position (center)
+
+        // Cache skill UI default position (center)
         if (skillRootRT == null && skillGroup != null)
             skillRootRT = skillGroup.GetComponent<RectTransform>();
-
         if (skillRootRT != null)
             skillRootRestPos = skillRootRT.anchoredPosition;
 
-
+        // Enable actions
         if (holdFixAction != null)
             holdFixAction.action.Enable();
+        if (gamepadHoldFixAction != null)
+            gamepadHoldFixAction.action.Enable();
+
+        if (skillCheckAction != null)
+            skillCheckAction.action.Enable();
+        if (gamepadSkillCheckAction != null)
+            gamepadSkillCheckAction.action.Enable();
+
+        // Listen to scheme changes for prompt / hold swap
+        if (InputSchemeUIManager.Instance != null)
+        {
+            InputSchemeUIManager.Instance.OnSchemeChanged += HandleSchemeChanged;
+        }
     }
 
     private void OnDisable()
     {
         if (holdFixAction != null)
             holdFixAction.action.Disable();
+            if (gamepadHoldFixAction != null)
+                gamepadHoldFixAction.action.Disable();
+
+        if (skillCheckAction != null)
+            skillCheckAction.action.Disable();
+        if (gamepadSkillCheckAction != null)
+            gamepadSkillCheckAction.action.Disable();
+
+        if (InputSchemeUIManager.Instance != null)
+        {
+            InputSchemeUIManager.Instance.OnSchemeChanged -= HandleSchemeChanged;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -195,6 +246,8 @@ public class RepairableFixable : MonoBehaviour
         if (repaired) return;
 
         bool press = playerInRange && holdFixAction != null && holdFixAction.action.IsPressed();
+        if (!press && playerInRange && gamepadHoldFixAction != null && gamepadHoldFixAction.action.IsPressed())
+            press = true;
 
         if (press && !holding)
         {
@@ -248,7 +301,22 @@ public class RepairableFixable : MonoBehaviour
     // ------------ UI helpers ------------
     private void ShowPrompt(bool on)
     {
-        if (promptRoot) promptRoot.SetActive(on);
+        if (!promptRoot) return;
+        promptRoot.SetActive(on);
+
+        if (on)
+            RefreshPromptVisual();
+    }
+
+    private void RefreshPromptVisual()
+    {
+        if (!promptRoot) return;
+
+        bool isGamepad = InputSchemeUIManager.Instance != null &&
+                         InputSchemeUIManager.Instance.IsGamepad;
+
+        if (keyboardPrompt) keyboardPrompt.SetActive(!isGamepad);
+        if (gamepadPrompt)  gamepadPrompt.SetActive(isGamepad);
     }
 
     private void ShowHold(bool on)
@@ -256,6 +324,31 @@ public class RepairableFixable : MonoBehaviour
         if (!holdGroup) return;
         holdGroup.alpha = on ? 1f : 0f;
         holdGroup.gameObject.SetActive(on);
+
+        if (on)
+            RefreshHoldVisual();
+    }
+
+    private void RefreshHoldVisual()
+    {
+        if (!holdGroup) return;
+
+        bool isGamepad = InputSchemeUIManager.Instance != null &&
+                         InputSchemeUIManager.Instance.IsGamepad;
+
+        if (keyboardHoldUI) keyboardHoldUI.SetActive(!isGamepad);
+        if (gamepadHoldUI)  gamepadHoldUI.SetActive(isGamepad);
+    }
+
+    private void HandleSchemeChanged(bool isGamepad)
+    {
+        // Update prompt if visible
+        if (promptRoot != null && promptRoot.activeSelf)
+            RefreshPromptVisual();
+
+        // Update hold if visible
+        if (holdGroup != null && holdGroup.gameObject.activeSelf)
+            RefreshHoldVisual();
     }
 
     private void ShowSkill(bool on)
@@ -268,8 +361,7 @@ public class RepairableFixable : MonoBehaviour
     // ------------ Skill-check logic ------------
     private void ScheduleNextSkillCheck()
     {
-       nextSkillCheckTime = Time.time + UnityEngine.Random.Range(skillCheckEverySeconds.x, skillCheckEverySeconds.y);
-
+        nextSkillCheckTime = Time.time + UnityEngine.Random.Range(skillCheckEverySeconds.x, skillCheckEverySeconds.y);
     }
 
     private void HandleSkillChecks()
@@ -286,7 +378,24 @@ public class RepairableFixable : MonoBehaviour
         if (needle)
             needle.localRotation = Quaternion.Euler(0f, 0f, -(needleAngleClock - CLOCK_ZERO_IS_UP));
 
-        if (Keyboard.current != null && Keyboard.current[skillCheckKey].wasPressedThisFrame)
+        // PRESS detection (keyboard OR gamepad L1)
+        bool pressedThisFrame = false;
+
+        bool isGamepad = InputSchemeUIManager.Instance != null &&
+                         InputSchemeUIManager.Instance.IsGamepad;
+
+        if (isGamepad)
+        {
+            if (skillCheckAction != null && skillCheckAction.action.triggered)
+                pressedThisFrame = true;   // L1
+        }
+        else
+        {
+            if (Keyboard.current != null && Keyboard.current[skillCheckKey].wasPressedThisFrame)
+                pressedThisFrame = true;   // Space
+        }
+
+        if (pressedThisFrame)
         {
             if (IsNeedleInSuccess())
             {
@@ -323,14 +432,14 @@ public class RepairableFixable : MonoBehaviour
         }
     }
 
-       private void StartSkillCheck()
+    private void StartSkillCheck()
     {
         skillActive = true;
         enteredZoneTime = -999f;
 
         SetupDial();
 
-        // ✅ Randomize UI position ONLY if toggle is ON
+        // Randomize UI position ONLY if toggle is ON
         if (randomizeSkillCheckPosition && skillRootRT != null)
         {
             float rx = UnityEngine.Random.Range(randomOffsetMin.x, randomOffsetMax.x);
@@ -355,11 +464,11 @@ public class RepairableFixable : MonoBehaviour
                 Quaternion.Euler(0f, 0f, -(successCenterDeg - CLOCK_ZERO_IS_UP));
     }
 
-
     private void EndSkillCheck()
     {
         skillActive = false;
         enteredZoneTime = -999f;
+
         // restore to center after each check
         if (skillRootRT != null)
             skillRootRT.anchoredPosition = skillRootRestPos;
@@ -410,22 +519,24 @@ public class RepairableFixable : MonoBehaviour
 
         foreach (var go in disableOnComplete)
             if (go) go.SetActive(false);
-// start fan animation after repair
-if (fanAnimator != null)
-{
-    fanAnimator.ResetTrigger(startFanTrigger);
-    fanAnimator.SetTrigger(startFanTrigger);
-}
 
-// play fan start sound at the same moment
-if (fanStartClip != null)
-{
-    if (fanAudioSource != null)
-        fanAudioSource.PlayOneShot(fanStartClip, fanStartVolume);
-    else
-        AudioSource.PlayClipAtPoint(fanStartClip, transform.position, fanStartVolume);
-}
-        // NEW: notify multi-repair objective manager
+        // start fan animation after repair
+        if (fanAnimator != null)
+        {
+            fanAnimator.ResetTrigger(startFanTrigger);
+            fanAnimator.SetTrigger(startFanTrigger);
+        }
+
+        // play fan start sound at the same moment
+        if (fanStartClip != null)
+        {
+            if (fanAudioSource != null)
+                fanAudioSource.PlayOneShot(fanStartClip, fanStartVolume);
+            else
+                AudioSource.PlayClipAtPoint(fanStartClip, transform.position, fanStartVolume);
+        }
+
+        // notify multi-repair objective manager
         OnRepaired?.Invoke(this);
     }
 
@@ -523,8 +634,6 @@ if (fanStartClip != null)
 
     private void TriggerFailExplosion()
     {
-        
-
         if (failExplosionPrefab != null)
         {
             var pos = explosionSpawnPoint ? explosionSpawnPoint.position : transform.position;
